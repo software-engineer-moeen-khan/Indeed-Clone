@@ -86,9 +86,6 @@ The application requires multiple background services to function properly:
 php artisan serve
 
 # Terminal 2 - Typesense server (required for ultra-fast search)
-# If using Docker:
-docker run -d --name typesense -p 8108:8108 -v typesense-data:/data typesense/typesense:27.1 --data-dir /data --api-key=your-api-key --enable-cors
-# Or if installed directly:
 ./typesense-server --data-dir=/tmp/typesense-data --api-key=your-api-key
 
 # Terminal 3 - Queue worker (required for job processing)
@@ -570,7 +567,7 @@ php artisan cache:clear
 
 **AI-Powered Tools:**
 - Intelligent cover letter generation based on job descriptions
-- Personalized job recommendations
+- Personalized job recommendations using RAG
 - Smart matching algorithms
 
 **User Management:**
