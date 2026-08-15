@@ -44,7 +44,7 @@ class DummyJobSeeder extends Seeder
                 'employer_logo' => null,
                 'employer_website' => 'https://example.com',
                 'employer_company_type' => 'Software Company',
-                'publisher' => 'Geezap Demo',
+                'publisher' => 'Best Way Jobs Demo',
                 'employment_type' => 'Full-time',
                 'job_title' => 'Senior Laravel Developer',
                 'job_category' => $categoryId,
@@ -89,18 +89,16 @@ class DummyJobSeeder extends Seeder
             ->where('slug', $slug)
             ->value('id');
 
-        DB::table('job_apply_options')->updateOrInsert(
-            [
-                'job_listing_id' => $jobListingId,
-                'publisher' => 'Geezap Demo',
-            ],
-            [
-                'apply_link' => $applyLink,
-                'is_direct' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        );
+        DB::table('job_apply_options')->where('job_listing_id', $jobListingId)->delete();
+
+        DB::table('job_apply_options')->insert([
+            'job_listing_id' => $jobListingId,
+            'publisher' => 'Best Way Jobs Demo',
+            'apply_link' => $applyLink,
+            'is_direct' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         // Homepage/job-list caches can otherwise hide the newly seeded record for hours.
         Cache::flush();
