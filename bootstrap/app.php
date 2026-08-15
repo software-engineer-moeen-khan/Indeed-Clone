@@ -23,18 +23,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Cloudflare Quick Tunnels terminate HTTPS before forwarding to the local
-        // HTTP server. Trust forwarded headers only in the local environment so
-        // Laravel generates secure URLs correctly while the temporary tunnel runs.
-        if (app()->environment('local')) {
-            $middleware->trustProxies(
-                at: '*',
-                headers: Request::HEADER_X_FORWARDED_FOR |
-                    Request::HEADER_X_FORWARDED_HOST |
-                    Request::HEADER_X_FORWARDED_PORT |
-                    Request::HEADER_X_FORWARDED_PROTO
-            );
-        }
+        // Cloudflare Quick Tunnel runs locally and forwards requests to Laravel
+        // from the loopback interface. Trust only local proxy addresses here.
+        // Avoid calling app()->environment() during middleware bootstrap because
+        // the environment binding is not guaranteed to be resolved at this stage.
+        $middleware->trustProxies(
+            at: ['127.0.0.1', '::1'],
+            headers: Request::HEADER_X_FORWARDED_FOR |
+                Request::HEADER_X_FORWARDED_HOST |
+                Request::HEADER_X_FORWARDED_PORT |
+                Request::HEADER_X_FORWARDED_PROTO
+        );
 
         //$middleware->append(BlockCrawlerMiddleware::class);
         $middleware->web(append: [
@@ -77,7 +76,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $schedule->command('model:prune')->everyMinute();
         $schedule->command('model:prune', [
-            '--model' => 'MeShaon\RequestAnalytics\Models\RequestAnalytics',
+            '--model' => 'MeShaon\\RequestAnalytics\\Models\\RequestAnalytics',
         ])->daily();
 
 
