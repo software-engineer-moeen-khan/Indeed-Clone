@@ -1,197 +1,83 @@
 @extends('v2.auth.app')
-@section('title') Register - Geezap @endsection
+@section('title') Sign Up - Geezap @endsection
+
 @section('content')
-    <div class="bg-white dark:bg-[#12122b] rounded-2xl shadow-2xl p-12 max-w-md w-full space-y-8 border border-gray-200 dark:border-gray-700">
-        <div class="text-center space-y-4">
-            <div class="mx-auto w-20 h-20 bg-gradient-to-br from-green-500 to-blue-600 rounded-2xl flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-            </div>
-            <h2 class="text-3xl font-bold text-gray-900 dark:text-white font-oxanium-bold">Join Geezap</h2>
-            <p class="text-gray-600 dark:text-gray-400 font-sans">Start your career journey with social sign-up</p>
+<div class="bg-white dark:bg-[#12122b] rounded-2xl shadow-2xl p-8 sm:p-10 max-w-md w-full space-y-7 border border-gray-200 dark:border-gray-700">
+    <div class="text-center space-y-3">
+        <div class="mx-auto w-16 h-16 bg-gradient-to-br from-green-500 to-blue-600 rounded-2xl flex items-center justify-center">
+            <i class="las la-user-plus text-3xl text-white"></i>
         </div>
-
-        <div class="flex justify-center mb-6">
-            <a href="{{ route('home') }}" class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-purple-400 transition-all duration-200 flex items-center gap-2 font-sans text-sm hover:scale-105">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Back to Home
-            </a>
-        </div>
-
-        <!-- Enhanced Social Login Options -->
-        <x-social-login/>
-
-        <!-- Traditional Registration Form (Commented Out) -->
-        {{-- 
-        <!-- Divider -->
-        <div class="flex items-center">
-            <hr class="flex-grow border-t border-gray-300 dark:border-gray-600">
-            <span class="px-4 text-gray-600 dark:text-gray-400 text-sm">or</span>
-            <hr class="flex-grow border-t border-gray-300 dark:border-gray-600">
-        </div>
-
-        <!-- Register Form -->
-        <form action="{{ route('register') }}" method="POST" class="space-y-4">
-            @csrf
-            <div>
-                <label for="RegisterName" class="block text-gray-700 dark:text-gray-400 text-sm mb-1">Full Name</label>
-                <input
-                    type="text"
-                    id="RegisterName"
-                    name="name"
-                    value="{{ old('name') }}"
-                    placeholder="Enter your full name"
-                    class="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-[#1a1a3a] text-gray-900 dark:text-white placeholder-gray-500 border border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-pink-500 focus:outline-none transition @error('name') border-red-500 @enderror"
-                >
-                @error('name')
-                <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
-                @enderror
-            </div>
-
-            <div>
-                <label for="LoginEmail" class="block text-gray-700 dark:text-gray-400 text-sm mb-1">Email</label>
-                <input
-                    type="email"
-                    id="LoginEmail"
-                    name="email"
-                    value="{{ old('email') }}"
-                    placeholder="Enter your email"
-                    class="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-[#1a1a3a] text-gray-900 dark:text-white placeholder-gray-500 border border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-pink-500 focus:outline-none transition @error('email') border-red-500 @enderror"
-                >
-                @error('email')
-                <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
-                @enderror
-            </div>
-
-            <div>
-                <label for="LoginPassword" class="block text-gray-700 dark:text-gray-400 text-sm mb-1">Password</label>
-                <div class="relative">
-                    <input
-                        type="password"
-                        id="LoginPassword"
-                        name="password"
-                        placeholder="Create a password"
-                        class="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-[#1a1a3a] text-gray-900 dark:text-white placeholder-gray-500 border border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-pink-500 focus:outline-none transition pr-12 @error('password') border-red-500 @enderror"
-                    >
-                    <button
-                        type="button"
-                        onclick="togglePassword('LoginPassword', this)"
-                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-                    >
-                        <svg class="eye-open w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <svg class="eye-closed w-5 h-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-                        </svg>
-                    </button>
-                </div>
-                @error('password')
-                <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
-                @enderror
-            </div>
-
-            <!-- Confirm Password Field with Toggle -->
-            <div>
-                <label for="ConfirmPassword" class="block text-gray-700 dark:text-gray-400 text-sm mb-1">Confirm Password</label>
-                <div class="relative">
-                    <input
-                        type="password"
-                        id="ConfirmPassword"
-                        name="password_confirmation"
-                        placeholder="Confirm your password"
-                        class="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-[#1a1a3a] text-gray-900 dark:text-white placeholder-gray-500 border border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-pink-500 focus:outline-none transition pr-12"
-                    >
-                    <button
-                        type="button"
-                        onclick="togglePassword('ConfirmPassword', this)"
-                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-                    >
-                        <svg class="eye-open w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <svg class="eye-closed w-5 h-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <div 
-                id="cf-turnstile-widget" 
-                class="cf-turnstile" 
-                data-sitekey="{{ config('services.cloudflare.turnstile.site_key') }}"
-            ></div>
-            @error('turnstile')
-                <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
-            @enderror
-
-            <div class="flex items-center text-sm">
-                <input
-                    type="checkbox"
-                    id="Accept:T&C"
-                    name="check"
-                    class="w-4 h-4 text-blue-500 dark:text-pink-500 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-pink-500 focus:ring-offset-white dark:focus:ring-offset-[#12122b] @error('check') border-red-500 @enderror"
-                >
-                <label for="Accept:T&C" class="ml-2 text-gray-700 dark:text-gray-400">
-                    I agree to the <a href="#" class="text-blue-600 dark:text-pink-500 hover:text-blue-700 dark:hover:text-pink-400 transition-colors">Terms and Conditions</a>
-                </label>
-            </div>
-            @error('check')
-            <span class="text-red-500 text-xs">{{ $message }}</span>
-            @enderror
-
-            <button
-                type="submit"
-                class="w-full bg-gradient-to-r from-blue-500 to-blue-600 dark:from-pink-500 dark:to-purple-600 text-white px-6 py-2.5 rounded-xl font-medium hover:opacity-90 transition-all"
-            >
-                Create Account
-            </button>
-        </form>
-        --}}
-
-        <!-- Login Link -->
-        <p class="text-center text-gray-600 dark:text-gray-400 mt-8 font-sans text-sm">
-            Already have an account?
-            <a href="{{ route('login') }}" class="text-blue-600 dark:text-purple-400 hover:text-blue-700 dark:hover:text-purple-300 transition-colors font-medium ml-1">
-                Sign in
-            </a>
-        </p>
-
-        <div class="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
-            <p class="text-xs text-gray-500 dark:text-gray-500">
-                By signing up, you agree to our 
-                <a href="{{ route('terms') }}" class="text-blue-600 dark:text-purple-400 hover:underline">Terms</a>
-                and 
-                <a href="{{ route('privacy-policy') }}" class="text-blue-600 dark:text-purple-400 hover:underline">Privacy Policy</a>
-            </p>
-        </div>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white font-oxanium-bold">Create your account</h1>
+        <p class="text-gray-600 dark:text-gray-400">Join Geezap and start applying for jobs</p>
     </div>
+
+    @if($errors->any())
+        <div class="rounded-xl bg-red-50 dark:bg-red-900/20 px-4 py-3 text-sm text-red-700 dark:text-red-300">
+            <ul class="list-disc pl-5 space-y-1">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form action="{{ route('register') }}" method="POST" class="space-y-4">
+        @csrf
+
+        <div>
+            <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Full name</label>
+            <input type="text" id="name" name="name" value="{{ old('name') }}" required autofocus autocomplete="name"
+                   placeholder="Your full name"
+                   class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#1a1a3a] text-gray-900 dark:text-white placeholder-gray-500 border border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-pink-500 focus:outline-none">
+        </div>
+
+        <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email address</label>
+            <input type="email" id="email" name="email" value="{{ old('email') }}" required autocomplete="email"
+                   placeholder="name@example.com"
+                   class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#1a1a3a] text-gray-900 dark:text-white placeholder-gray-500 border border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-pink-500 focus:outline-none">
+        </div>
+
+        <div>
+            <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password</label>
+            <input type="password" id="password" name="password" required autocomplete="new-password"
+                   placeholder="Minimum 8 characters"
+                   class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#1a1a3a] text-gray-900 dark:text-white placeholder-gray-500 border border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-pink-500 focus:outline-none">
+            <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Use uppercase, lowercase and at least one number.</p>
+        </div>
+
+        <div>
+            <label for="password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Confirm password</label>
+            <input type="password" id="password_confirmation" name="password_confirmation" required autocomplete="new-password"
+                   placeholder="Repeat your password"
+                   class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#1a1a3a] text-gray-900 dark:text-white placeholder-gray-500 border border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-pink-500 focus:outline-none">
+        </div>
+
+        <label class="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-300">
+            <input type="checkbox" name="check" value="1" required class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            <span>I agree to the <a href="{{ route('terms') }}" class="text-blue-600 dark:text-pink-400 hover:underline">Terms</a> and <a href="{{ route('privacy-policy') }}" class="text-blue-600 dark:text-pink-400 hover:underline">Privacy Policy</a>.</span>
+        </label>
+
+        <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 dark:from-pink-500 dark:to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
+            Create Account
+        </button>
+    </form>
+
+    <div class="flex items-center gap-3">
+        <div class="h-px flex-1 bg-gray-200 dark:bg-gray-700"></div>
+        <span class="text-xs text-gray-500">OR</span>
+        <div class="h-px flex-1 bg-gray-200 dark:bg-gray-700"></div>
+    </div>
+
+    <x-social-login/>
+
+    <p class="text-center text-sm text-gray-600 dark:text-gray-400">
+        Already have an account?
+        <a href="{{ route('login') }}" class="font-semibold text-blue-600 dark:text-pink-400 hover:underline">Sign In</a>
+    </p>
+
+    <div class="text-center">
+        <a href="{{ route('home') }}" class="text-sm text-gray-500 hover:text-blue-600 dark:hover:text-pink-400">← Back to home</a>
+    </div>
+</div>
 @endsection
-@push('extra-js')
-    <script>
-        function togglePassword(inputId, button) {
-            const passwordInput = document.getElementById(inputId);
-            const eyeOpen = button.querySelector('.eye-open');
-            const eyeClosed = button.querySelector('.eye-closed');
-
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                eyeOpen.classList.add('hidden');
-                eyeClosed.classList.remove('hidden');
-            } else {
-                passwordInput.type = 'password';
-                eyeOpen.classList.remove('hidden');
-                eyeClosed.classList.add('hidden');
-            }
-        }
-    </script>
-
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-@endpush
-
