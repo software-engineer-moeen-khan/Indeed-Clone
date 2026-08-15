@@ -1,17 +1,10 @@
-<div class="hidden md:flex items-center space-x-1">
-    <a href="{{route('job.index')}}" class="text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-pink-500 px-4 py-2 rounded-lg {{ request()->routeIs('job.index') ? 'bg-gray-100 dark:bg-white/10 text-blue-600 dark:text-pink-500' : 'hover:bg-gray-100 dark:hover:bg-white/5' }} transition-all flex items-center gap-2">
-        <div class="w-8 h-8 rounded-lg bg-blue-500/10 dark:bg-pink-500/10 flex items-center justify-center">
-            <i class="las la-briefcase text-blue-500 dark:text-pink-500"></i>
-        </div>
-        <span>Browse Jobs</span>
+<div class="hidden md:flex items-center h-16 gap-1">
+    <a href="{{ route('job.index') }}"
+       class="h-16 inline-flex items-center px-4 text-sm font-medium border-b-2 {{ request()->routeIs('job.index') || request()->routeIs('job.show') ? 'border-[#2557a7] text-[#2557a7]' : 'border-transparent text-[#2d2d2d] hover:text-[#2557a7] hover:border-[#2557a7]' }}">
+        Find jobs
     </a>
-    <a href="{{route('job.categories')}}" class="text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-pink-500 px-4 py-2 rounded-lg {{ request()->routeIs('job.categories') ? 'bg-gray-100 dark:bg-white/10 text-blue-600 dark:text-pink-500' : 'hover:bg-gray-100 dark:hover:bg-white/5' }} transition-all flex items-center gap-2">
-        <div class="w-8 h-8 rounded-lg bg-blue-500/10 dark:bg-pink-500/10 flex items-center justify-center">
-            <i class="las la-layer-group text-blue-500 dark:text-pink-500"></i>
-        </div>
-        <span>Categories</span>
+    <a href="{{ route('job.categories') }}"
+       class="h-16 inline-flex items-center px-4 text-sm font-medium border-b-2 {{ request()->routeIs('job.categories') ? 'border-[#2557a7] text-[#2557a7]' : 'border-transparent text-[#2d2d2d] hover:text-[#2557a7] hover:border-[#2557a7]' }}">
+        Browse categories
     </a>
-    
-    <!-- Theme Switcher -->
-    <x-theme-switcher />
 </div>
