@@ -1,38 +1,30 @@
 @include('v2.partials.header')
-<body class="bg-white dark:bg-[#0A0A1B] font-sans">
-<!-- Navigation -->
-<nav class="bg-white dark:bg-[#12122b] border-b border-gray-200 dark:border-gray-800">
-    <div class="max-w-7xl mx-auto px-6">
-        <div class="flex justify-between items-center h-20">
-            <!-- Left Section: Logo and Menu -->
+<body class="bg-white text-[#2d2d2d] font-sans antialiased">
+<nav class="sticky top-0 z-40 bg-white border-b border-[#e4e2e0]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
             <div class="flex items-center gap-8">
-                <!-- Logo -->
                 @include('v2.partials.logo')
-
-                <!-- Desktop Menu -->
-               @include('v2.partials.desktop-menu')
+                @include('v2.partials.desktop-menu')
             </div>
 
-            <!-- Right Section: Auth Controls -->
-           @include('v2.partials.header-auth')
+            @include('v2.partials.header-auth')
 
-            <!-- Mobile Menu Button -->
-            <button class="md:hidden w-10 h-10 rounded-lg bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors flex items-center justify-center"
+            <button class="md:hidden w-10 h-10 rounded-lg hover:bg-[#f3f2f1] transition-colors flex items-center justify-center"
                     onclick="toggleMobileMenu()"
-                    id="menu-toggle">
-                <i class="las la-bars text-2xl text-gray-900 dark:text-white transition-transform duration-300"></i>
+                    id="menu-toggle"
+                    aria-label="Open menu">
+                <i class="las la-bars text-2xl text-[#2d2d2d] transition-transform duration-300"></i>
             </button>
         </div>
     </div>
 
-   @include('v2.partials.mobile-menu')
+    @include('v2.partials.mobile-menu')
 </nav>
 
-@yield('content')
+<main>
+    @yield('content')
+</main>
 
-<!-- Footer -->
 @include('v2.partials.footer')
-
-<!-- Global Notification Component -->
 <x-notification />
-
