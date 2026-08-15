@@ -1,19 +1,22 @@
 <?php
+
 namespace App\Caches;
 
-use App\Models\JobListing;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
-class JobViewsCache{
-
+class JobViewsCache
+{
     public static function get($slug, $ip)
     {
         return Cache::remember(self::key($slug, $ip), 5 * 60, function () use ($slug) {
             MostViewedJobsCache::invalidate();
-            return JobListing::query()
+
+            // Update the counter directly so a page view does not trigger the
+            // JobListing model observer and invalidate unrelated job caches.
+            return DB::table('job_listings')
                 ->where('slug', $slug)
-                ->firstOrFail()
-                ->increment('views', 20);
+                ->increment('views', 1);
         });
     }
 
@@ -22,9 +25,9 @@ class JobViewsCache{
         return Cache::forget(self::key($slug, $ip));
     }
 
-    public static function key($slug, $ip)
+    public static function key($slug, $ip): string
     {
-        return 'job_' . $slug . '_view_' . $ip . '_' . now()->format('Y-m-d-H-i');
+        // Count a visitor at most once per five-minute cache lifetime.
+        return 'job_' . $slug . '_view_' . sha1((string) $ip);
     }
-
 }
