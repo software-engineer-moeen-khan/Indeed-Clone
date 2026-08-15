@@ -3,6 +3,7 @@
 use App\Http\Middleware\BlockCrawlerMiddleware;
 use App\Http\Middleware\CaptureCloudflareCountry;
 use App\Http\Middleware\PrometheusMiddleware;
+use App\Http\Middleware\ReplaceLegacyBranding;
 use App\Http\Middleware\VerifyClouflareTurnstile;
 use App\Jobs\DispatchJobCategories;
 use App\Jobs\NotifyUserAboutNewJobs;
@@ -39,9 +40,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             CaptureCloudflareCountry::class,
             PrometheusMiddleware::class,
+            ReplaceLegacyBranding::class,
         ]);
         $middleware->alias([
-            'cf-turnstile.verify' => VerifyClouflareTurnstile::class,
+            'cf-turnstile.verify' => VerifyCloufareTurnstile::class,
             'api.throttle' => \App\Http\Middleware\ApiThrottleMiddleware::class,
             'onboarding.required' => \App\Http\Middleware\EnsureOnboardingCompleted::class,
         ]);
