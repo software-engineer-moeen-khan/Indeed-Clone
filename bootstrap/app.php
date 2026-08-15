@@ -43,7 +43,7 @@ return Application::configure(basePath: dirname(__DIR__))
             ReplaceLegacyBranding::class,
         ]);
         $middleware->alias([
-            'cf-turnstile.verify' => VerifyCloufareTurnstile::class,
+            'cf-turnstile.verify' => VerifyClouflareTurnstile::class,
             'api.throttle' => \App\Http\Middleware\ApiThrottleMiddleware::class,
             'onboarding.required' => \App\Http\Middleware\EnsureOnboardingCompleted::class,
         ]);
