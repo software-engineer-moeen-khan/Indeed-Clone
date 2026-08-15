@@ -1,42 +1,46 @@
-<footer class="py-12 bg-gray-50 dark:bg-secondary border-t border-gray-200 dark:border-gray-800">
-    <div class="max-w-7xl mx-auto px-6">
+<footer class="bg-white border-t border-[#e4e2e0] mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
-                <h4 class="text-lg font-sans mb-4 text-gray-900 dark:text-white">For Developers</h4>
-                <ul class="space-y-2 font-sans">
-                    <li><a href="/jobs" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-pink-400 transition">Browse Jobs</a></li>
-                    <li><a href="/categories" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-pink-400 transition">Categories</a></li>
-                    <li><a href="/dashboard" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-pink-400 transition">My Profile</a></li>
+                <h4 class="text-sm font-bold text-[#2d2d2d] mb-4">Job seekers</h4>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="{{ route('job.index') }}" class="text-[#595959] hover:text-[#2557a7] hover:underline">Browse jobs</a></li>
+                    <li><a href="{{ route('job.categories') }}" class="text-[#595959] hover:text-[#2557a7] hover:underline">Browse categories</a></li>
+                    <li><a href="{{ route('dashboard') }}" class="text-[#595959] hover:text-[#2557a7] hover:underline">My profile</a></li>
                 </ul>
             </div>
 
             <div>
-                <h4 class="text-lg font-sans mb-4 text-gray-900 dark:text-white">Company</h4>
-                <ul class="space-y-2 font-sans">
-                    <li><a href="/" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-pink-400 transition">Home</a></li>
-                    <li><a href="/about" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-pink-400 transition">About Us</a></li>
-                    <li><a href="/contact" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-pink-400 transition">Contact</a></li>
+                <h4 class="text-sm font-bold text-[#2d2d2d] mb-4">Company</h4>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="{{ route('home') }}" class="text-[#595959] hover:text-[#2557a7] hover:underline">Home</a></li>
+                    <li><a href="{{ route('about') }}" class="text-[#595959] hover:text-[#2557a7] hover:underline">About</a></li>
+                    <li><a href="{{ route('contact') }}" class="text-[#595959] hover:text-[#2557a7] hover:underline">Contact</a></li>
                 </ul>
             </div>
 
             <div>
-                <h4 class="text-lg font-sans mb-4 text-gray-900 dark:text-white">Connect</h4>
-                <ul class="space-y-2 font-sans">
-                    <li><a href="https://facebook.com/geezap247" target="_blank" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-pink-400 transition">Facebook</a></li>
-                    <li><a href="https://github.com/theihasan/geezap" target="_blank" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-pink-400 transition">GitHub</a></li>
+                <h4 class="text-sm font-bold text-[#2d2d2d] mb-4">Connect</h4>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="https://facebook.com/geezap247" target="_blank" rel="noopener" class="text-[#595959] hover:text-[#2557a7] hover:underline">Facebook</a></li>
+                    <li><a href="https://github.com/theihasan/geezap" target="_blank" rel="noopener" class="text-[#595959] hover:text-[#2557a7] hover:underline">GitHub</a></li>
                 </ul>
             </div>
 
             <div>
-                <h4 class="text-lg font-sans mb-4 text-gray-900 dark:text-white">Legal</h4>
-                <ul class="space-y-2 font-sans">
-                    <li><a href="/privacy-policy" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-pink-400 transition">Privacy Policy</a></li>
-                    <li><a href="/terms" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-pink-400 transition">Terms of Service</a></li>
+                <h4 class="text-sm font-bold text-[#2d2d2d] mb-4">Legal</h4>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="{{ route('privacy-policy') }}" class="text-[#595959] hover:text-[#2557a7] hover:underline">Privacy</a></li>
+                    <li><a href="{{ route('terms') }}" class="text-[#595959] hover:text-[#2557a7] hover:underline">Terms</a></li>
                 </ul>
             </div>
         </div>
 
-        <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800 text-center text-gray-600 dark:text-gray-300 font-sans">
+        <div class="mt-10 pt-6 border-t border-[#e4e2e0] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between text-sm text-[#595959]">
+            <div class="flex items-center gap-2">
+                <span class="flex h-7 w-7 items-center justify-center rounded-md bg-[#2557a7] text-xs font-bold text-white">G</span>
+                <span class="font-semibold text-[#2d2d2d]">Geezap</span>
+            </div>
             <p>© {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
         </div>
     </div>
