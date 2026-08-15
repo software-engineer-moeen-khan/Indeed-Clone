@@ -1,40 +1,41 @@
-<div class="hidden md:flex items-center space-x-3">
+<div class="hidden md:flex items-center gap-3">
     @guest
-        <a href="{{ route('login') }}" class="bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-900 dark:text-white px-4 py-2 rounded-xl transition-colors flex items-center gap-2">
-            <i class="las la-sign-in-alt"></i>
-            Login
+        <a href="{{ route('login') }}"
+           class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-[#2557a7] hover:bg-[#eef4fb] rounded-lg transition-colors">
+            Sign in
         </a>
-        <a href="{{ route('register') }}" class="bg-blue-600 hover:bg-blue-700 dark:bg-pink-500 dark:hover:bg-pink-600 text-white px-4 py-2 rounded-xl transition-colors flex items-center gap-2 shadow-sm">
-            <i class="las la-user-plus"></i>
-            Sign Up
+        <a href="{{ route('register') }}"
+           class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-white bg-[#2557a7] hover:bg-[#164081] rounded-lg transition-colors">
+            Sign up
         </a>
     @endguest
 
     @auth
         <div class="relative" x-data="{ open: false }">
             <button @click="open = !open" @click.away="open = false"
-                    class="flex items-center gap-2 text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-pink-500 px-2 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-all">
-                <img src="{{ auth()->user()->profile_image_or_default }}" alt="{{ auth()->user()->name }}" class="w-8 h-8 rounded-lg object-cover">
-                <span>{{ auth()->user()->name }}</span>
-                <i class="las la-angle-down transition-transform" :class="{ 'rotate-180': open }"></i>
+                    class="flex items-center gap-2.5 text-[#2d2d2d] px-2.5 py-2 rounded-lg hover:bg-[#f3f2f1] transition-colors">
+                <img src="{{ auth()->user()->profile_image_or_default }}" alt="{{ auth()->user()->name }}" class="w-8 h-8 rounded-full object-cover border border-[#d4d2d0]">
+                <span class="text-sm font-semibold max-w-36 truncate">{{ auth()->user()->name }}</span>
+                <i class="las la-angle-down text-sm transition-transform" :class="{ 'rotate-180': open }"></i>
             </button>
 
             <div x-show="open"
+                 x-cloak
                  x-transition
-                 class="absolute right-0 mt-2 w-48 rounded-xl bg-white dark:bg-[#1a1a3a] border border-gray-200 dark:border-gray-700 shadow-xl z-50">
+                 class="absolute right-0 mt-2 w-56 rounded-xl bg-white border border-[#d4d2d0] shadow-lg z-50 overflow-hidden">
                 <div class="p-2">
-                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-pink-500 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-all">
-                        <i class="las la-user-circle"></i> View Profile
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm text-[#2d2d2d] hover:bg-[#f3f2f1] rounded-lg">
+                        <i class="las la-user-circle text-lg text-[#2557a7]"></i> Profile
                     </a>
-                    <a href="{{ route('applications') }}" class="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-pink-500 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-all">
-                        <i class="las la-briefcase"></i> My Applications
+                    <a href="{{ route('applications') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm text-[#2d2d2d] hover:bg-[#f3f2f1] rounded-lg">
+                        <i class="las la-briefcase text-lg text-[#2557a7]"></i> My applications
                     </a>
-                    <a href="{{ route('profile.preferences') }}" class="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-pink-500 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-all">
-                        <i class="las la-cog"></i> Preferences
+                    <a href="{{ route('profile.preferences') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm text-[#2d2d2d] hover:bg-[#f3f2f1] rounded-lg">
+                        <i class="las la-cog text-lg text-[#2557a7]"></i> Preferences
                     </a>
-                    <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
-                    <a href="{{ route('logout') }}" class="flex items-center gap-2 px-4 py-2 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-500 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-all">
-                        <i class="las la-sign-out-alt"></i> Sign Out
+                    <div class="border-t border-[#e4e2e0] my-2"></div>
+                    <a href="{{ route('logout') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-lg">
+                        <i class="las la-sign-out-alt text-lg"></i> Sign out
                     </a>
                 </div>
             </div>
