@@ -49,6 +49,29 @@
 @livewireScripts
 
 <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const emailShareButton = document.querySelector('button[onclick="shareViaEmail()"]');
+
+        if (emailShareButton && !document.getElementById('whatsapp-share-button')) {
+            window.shareOnWhatsApp = function () {
+                const jobTitle = document.querySelector('h1')?.textContent?.trim() || document.title;
+                const text = encodeURIComponent(`Check out this job opportunity on Best Way Jobs: ${jobTitle}\n${window.location.href}`);
+                window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
+            };
+
+            const whatsappButton = document.createElement('button');
+            whatsappButton.id = 'whatsapp-share-button';
+            whatsappButton.type = 'button';
+            whatsappButton.setAttribute('onclick', 'shareOnWhatsApp()');
+            whatsappButton.setAttribute('title', 'Share on WhatsApp');
+            whatsappButton.setAttribute('aria-label', 'Share on WhatsApp');
+            whatsappButton.className = 'w-9 h-9 bg-[#25D366] hover:bg-[#1ebe5d] text-white rounded-lg flex items-center justify-center transition-colors duration-200';
+            whatsappButton.innerHTML = '<i class="lab la-whatsapp text-base"></i>';
+
+            emailShareButton.parentNode.insertBefore(whatsappButton, emailShareButton);
+        }
+    });
+
     window.addEventListener('load', () => {
         if ('requestIdleCallback' in window) {
             requestIdleCallback(() => {
