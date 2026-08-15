@@ -38,10 +38,10 @@
 
         <div class="mt-10 pt-6 border-t border-[#e4e2e0] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between text-sm text-[#595959]">
             <div class="flex items-center gap-2">
-                <span class="flex h-7 w-7 items-center justify-center rounded-md bg-[#2557a7] text-xs font-bold text-white">G</span>
-                <span class="font-semibold text-[#2d2d2d]">Geezap</span>
+                <span class="flex h-7 w-7 items-center justify-center rounded-md bg-[#2557a7] text-xs font-bold text-white">B</span>
+                <span class="font-semibold text-[#2d2d2d]">Best Way Jobs</span>
             </div>
-            <p>© {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
+            <p>© {{ date('Y') }} Best Way Jobs. All rights reserved.</p>
         </div>
     </div>
 </footer>
