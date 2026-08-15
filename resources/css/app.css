@@ -88,8 +88,59 @@
     box-shadow: 0 1px 2px rgba(45, 45, 45, 0.06);
 }
 
-/* Keep legacy dark-mode utility markup visually consistent with the new light-first public theme. */
 html.light body {
     background: #ffffff;
     color: var(--brand-text);
+}
+
+/* Homepage job search: clean bordered search experience inspired by modern job boards. */
+#searchForm {
+    max-width: 880px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#searchInput {
+    min-height: 60px;
+    border: 1px solid #949494 !important;
+    border-radius: 10px !important;
+    background: #ffffff !important;
+    color: var(--brand-text) !important;
+    box-shadow: 0 1px 2px rgba(45, 45, 45, 0.08) !important;
+}
+
+#searchInput:focus {
+    border-color: var(--brand-primary) !important;
+    box-shadow: 0 0 0 1px var(--brand-primary) !important;
+}
+
+#searchForm button[type="submit"] {
+    background-image: none !important;
+    background-color: var(--brand-primary) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+}
+
+#searchForm button[type="submit"]:hover {
+    background-color: var(--brand-primary-hover) !important;
+    transform: none !important;
+}
+
+#autocompleteDropdown {
+    background: #ffffff !important;
+    border: 1px solid var(--brand-border) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 8px 24px rgba(45, 45, 45, 0.12) !important;
+}
+
+@media (max-width: 640px) {
+    #searchInput {
+        padding-right: 4rem !important;
+    }
+
+    #searchForm button[type="submit"] {
+        min-width: 48px;
+        padding-left: 0.9rem !important;
+        padding-right: 0.9rem !important;
+    }
 }
