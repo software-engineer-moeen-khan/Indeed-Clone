@@ -12,7 +12,7 @@
             </p>
         </div>
 
-        <form action="{{ route('job.index') }}" method="GET" class="indeed-search-shell mt-8 sm:mt-10">
+        <form action="{{ route('job.index') }}" method="GET" data-click-ad-placement="on_find_jobs" class="indeed-search-shell mt-8 sm:mt-10">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.25fr_0.8fr_0.8fr_auto] gap-3 items-end">
                 <div class="indeed-search-field">
                     <label for="home-search">What</label>
