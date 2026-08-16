@@ -28,3 +28,46 @@
 
 @include('v2.partials.footer')
 <x-notification />
+
+<button
+    type="button"
+    id="back-to-top"
+    class="fixed bottom-5 right-5 sm:bottom-7 sm:right-7 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-[#2557a7] text-white shadow-lg opacity-0 invisible translate-y-3 transition-all duration-200 hover:bg-[#164081] focus:outline-none focus:ring-4 focus:ring-[#2557a7]/25"
+    aria-label="Back to top"
+    title="Back to top"
+>
+    <i class="las la-arrow-up text-xl" aria-hidden="true"></i>
+</button>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const backToTopButton = document.getElementById('back-to-top');
+
+        if (!backToTopButton) {
+            return;
+        }
+
+        const updateBackToTopVisibility = () => {
+            const shouldShow = window.scrollY > 350;
+
+            backToTopButton.classList.toggle('opacity-0', !shouldShow);
+            backToTopButton.classList.toggle('invisible', !shouldShow);
+            backToTopButton.classList.toggle('translate-y-3', !shouldShow);
+            backToTopButton.classList.toggle('opacity-100', shouldShow);
+            backToTopButton.classList.toggle('visible', shouldShow);
+            backToTopButton.classList.toggle('translate-y-0', shouldShow);
+        };
+
+        window.addEventListener('scroll', updateBackToTopVisibility, { passive: true });
+        updateBackToTopVisibility();
+
+        backToTopButton.addEventListener('click', function () {
+            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            window.scrollTo({
+                top: 0,
+                behavior: reduceMotion ? 'auto' : 'smooth',
+            });
+        });
+    });
+</script>
