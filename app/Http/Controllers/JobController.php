@@ -70,7 +70,6 @@ class JobController extends Controller
         $currentPage = $jobs->currentPage();
         $meta = $seoService->generateJobsIndexMeta($request, $jobs->total());
         $countries = Country::query()
-            ->where('is_active', true)
             ->orderBy('name')
             ->get(['name', 'code']);
 
