@@ -27,19 +27,10 @@
     </div>
 
     <div class="mt-3 flex flex-wrap gap-2">
-        @if($job->min_salary || $job->max_salary)
+        @if($job->formatted_salary)
             <span class="indeed-chip">
                 <i class="las la-money-bill-wave text-[#595959]"></i>
-                @if($job->min_salary && $job->max_salary)
-                    {{ $job->salary_currency ?: '$' }}{{ number_format($job->min_salary) }} - {{ $job->salary_currency ?: '$' }}{{ number_format($job->max_salary) }}
-                @elseif($job->min_salary)
-                    From {{ $job->salary_currency ?: '$' }}{{ number_format($job->min_salary) }}
-                @else
-                    Up to {{ $job->salary_currency ?: '$' }}{{ number_format($job->max_salary) }}
-                @endif
-                @if($job->salary_period)
-                    / {{ $job->salary_period }}
-                @endif
+                {{ $job->formatted_salary }}
             </span>
         @endif
 
