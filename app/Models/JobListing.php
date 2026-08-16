@@ -100,6 +100,55 @@ class JobListing extends Model
         })->toArray();
     }
 
+    /**
+     * Return one consistent salary string for every frontend location.
+     * The currency is taken directly from salary_currency, so the value
+     * entered in the admin panel is the value shown to job seekers.
+     */
+    public function getFormattedSalaryAttribute(): ?string
+    {
+        $hasMin = $this->min_salary !== null && $this->min_salary !== '';
+        $hasMax = $this->max_salary !== null && $this->max_salary !== '';
+
+        if (! $hasMin && ! $hasMax) {
+            return null;
+        }
+
+        $currency = trim((string) $this->salary_currency);
+
+        $formatAmount = static function ($value) use ($currency): string {
+            $numericValue = (float) $value;
+            $decimals = floor($numericValue) === $numericValue ? 0 : 2;
+            $amount = number_format($numericValue, $decimals);
+
+            if ($currency === '') {
+                return $amount;
+            }
+
+            // Currency symbols read naturally without a space ($1,000),
+            // while currency codes read naturally with one (PKR 1,000).
+            $isSymbol = preg_match('/^[^\p{L}\p{N}]+$/u', $currency) === 1;
+
+            return $isSymbol
+                ? $currency.$amount
+                : $currency.' '.$amount;
+        };
+
+        if ($hasMin && $hasMax) {
+            $salary = $formatAmount($this->min_salary).' - '.$formatAmount($this->max_salary);
+        } elseif ($hasMin) {
+            $salary = 'From '.$formatAmount($this->min_salary);
+        } else {
+            $salary = 'Up to '.$formatAmount($this->max_salary);
+        }
+
+        if ($this->salary_period) {
+            $salary .= ' / '.trim((string) $this->salary_period);
+        }
+
+        return $salary;
+    }
+
     public function prunable(): Builder
     {
         return static::query()->where('created_at', '<=', now()->subDays(14));
