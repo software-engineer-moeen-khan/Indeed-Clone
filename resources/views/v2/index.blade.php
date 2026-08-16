@@ -13,7 +13,7 @@
         </div>
 
         <form action="{{ route('job.index') }}" method="GET" class="indeed-search-shell mt-8 sm:mt-10">
-            <div class="indeed-search-grid">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.25fr_0.8fr_0.8fr_auto] gap-3 items-end">
                 <div class="indeed-search-field">
                     <label for="home-search">What</label>
                     <i class="las la-search"></i>
@@ -29,18 +29,32 @@
                 </div>
 
                 <div class="indeed-search-field">
-                    <label for="home-country">Where</label>
-                    <i class="las la-map-marker-alt"></i>
+                    <label for="home-city">City</label>
+                    <i class="las la-city"></i>
+                    <input
+                        id="home-city"
+                        name="city"
+                        type="text"
+                        class="indeed-input"
+                        value="{{ request('city') }}"
+                        placeholder="e.g. Lahore"
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div class="indeed-search-field">
+                    <label for="home-country">Country</label>
+                    <i class="las la-globe"></i>
                     <select id="home-country" name="country" class="indeed-input appearance-none">
-                        <option value="">Any location</option>
+                        <option value="">All countries</option>
                         @foreach($topCountries as $country)
-                            <option value="{{ $country->code }}">{{ $country->name }}</option>
+                            <option value="{{ $country->code }}" @selected(request('country') === $country->code)>{{ $country->name }}</option>
                         @endforeach
                     </select>
                 </div>
 
                 <div class="indeed-search-button-wrap">
-                    <button type="submit" class="btn-primary px-7">
+                    <button type="submit" class="btn-primary px-7 min-h-[52px]">
                         Find jobs
                     </button>
                 </div>
