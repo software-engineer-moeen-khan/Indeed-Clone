@@ -25,12 +25,9 @@ final class JobFilterCache
 
     public static function getCountries()
     {
-        return Cache::remember(self::key('countries'), now()->addDay(), function () {
-            $countryCodes = JobListing::distinct()
-                ->whereNotNull('country')
-                ->pluck('country');
-
-            return Country::whereIn('code', $countryCodes)
+        return Cache::remember(self::key('countries_all_v2'), now()->addDay(), function () {
+            return Country::query()
+                ->orderBy('name')
                 ->get()
                 ->keyBy('code');
         });
@@ -45,6 +42,7 @@ final class JobFilterCache
         Cache::forget(self::key('categories'));
         Cache::forget(self::key('publishers'));
         Cache::forget(self::key('countries'));
+        Cache::forget(self::key('countries_all_v2'));
     }
 
     private static function key($type)
