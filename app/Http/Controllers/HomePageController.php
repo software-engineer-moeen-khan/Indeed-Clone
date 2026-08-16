@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Caches\CountriesCache;
 use App\Caches\CountryJobCountCache;
 use App\Caches\JobCategoryCache;
 use App\Caches\JobsCountCache;
-use App\Caches\CountryAwareLatestJobsCache;
 use App\Caches\CountryAwareMostViewedJobsCache;
-use App\Caches\LatestJobsCache;
 use App\Caches\MostViewedJobsCache;
+use App\Models\JobListing;
 use App\Services\SeoMetaService;
 use App\Traits\DetectsUserCountry;
 use Illuminate\Contracts\View\Factory;
@@ -25,23 +23,27 @@ class HomePageController extends Controller
     {
         try {
             $userCountry = $this->getUserCountry();
-
             $mostViewedJobs = CountryAwareMostViewedJobsCache::get($userCountry);
-
-            // Latest jobs must be independent from Popular/Most Viewed jobs.
-            // A newly-created job can legitimately appear in both sections.
-            $latestJobs = CountryAwareLatestJobsCache::get([], $userCountry, 6);
         } catch (\Throwable $e) {
-            Log::warning('Country-aware cache failed on homepage, falling back to default', [
+            Log::warning('Country-aware popular jobs cache failed on homepage, falling back to default', [
                 'error' => $e->getMessage(),
                 'memory_usage' => memory_get_usage(true),
                 'memory_peak' => memory_get_peak_usage(true),
             ]);
 
             $mostViewedJobs = MostViewedJobsCache::get();
-            $latestJobs = LatestJobsCache::get([], 6);
             $userCountry = null;
         }
+
+        // Always read Latest Jobs directly from the database so a job created in
+        // the admin panel appears immediately. Do not exclude Popular jobs and do
+        // not cache this small six-record query.
+        $latestJobs = JobListing::query()
+            ->with('category')
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->limit(6)
+            ->get();
 
         $jobCategories = JobCategoryCache::getTopCategories();
         $todayAddedJobsCount = JobsCountCache::todayAdded();
