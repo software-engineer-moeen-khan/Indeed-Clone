@@ -47,7 +47,7 @@
                     <i class="las la-globe"></i>
                     <select id="home-country" name="country" class="indeed-input appearance-none">
                         <option value="">All countries</option>
-                        @foreach($topCountries as $country)
+                        @foreach($searchCountries as $country)
                             <option value="{{ $country->code }}" @selected(request('country') === $country->code)>{{ $country->name }}</option>
                         @endforeach
                     </select>
