@@ -7,11 +7,14 @@ use Illuminate\Support\Facades\Cache;
 
 class CountryAwareLatestJobsCache
 {
+    private const VERSION_KEY = 'country_aware_latest_jobs_cache_version';
+
     public static function get(array $excludeIds = [], ?string $userCountry = null, int $limit = 4)
     {
-        return Cache::remember(self::key($userCountry, $excludeIds), 60 * 24, function () use ($excludeIds, $userCountry, $limit) {
+        return Cache::remember(self::key($userCountry, $excludeIds, $limit), 60 * 24, function () use ($excludeIds, $userCountry, $limit) {
             if ($userCountry) {
                 $countryJobs = JobListing::query()
+                    ->with('category')
                     ->whereNotIn('id', $excludeIds)
                     ->where('country', $userCountry)
                     ->latest()
@@ -21,20 +24,22 @@ class CountryAwareLatestJobsCache
                 if ($countryJobs->count() < $limit) {
                     $needed = $limit - $countryJobs->count();
                     $countryExcludeIds = array_merge($excludeIds, $countryJobs->pluck('id')->toArray());
-                    
+
                     $globalJobs = JobListing::query()
+                        ->with('category')
                         ->whereNotIn('id', $countryExcludeIds)
                         ->latest()
                         ->limit($needed)
                         ->get();
-                    
+
                     return $countryJobs->merge($globalJobs);
                 }
-                
+
                 return $countryJobs;
             }
 
             return JobListing::query()
+                ->with('category')
                 ->whereNotIn('id', $excludeIds)
                 ->latest()
                 ->limit($limit)
@@ -42,24 +47,21 @@ class CountryAwareLatestJobsCache
         });
     }
 
-    public static function invalidate(?string $userCountry = null)
+    /**
+     * Rotate the cache namespace so all country/exclusion variants become stale.
+     * Cache::forget() does not support wildcard keys on Laravel's file cache.
+     */
+    public static function invalidate(?string $userCountry = null): void
     {
-        if ($userCountry) {
-            // Clear specific country caches
-            for ($i = 1; $i <= 5; $i++) {
-                Cache::forget("latestJobs_country_{$userCountry}_exclude_*");
-            }
-        }
-        
-        // Clear global caches
-        Cache::forget('latestJobs_global_exclude_*');
+        Cache::forever(self::VERSION_KEY, (string) microtime(true));
     }
 
-    public static function key(?string $userCountry = null, array $excludeIds = [])
+    public static function key(?string $userCountry = null, array $excludeIds = [], int $limit = 4): string
     {
         $excludeHash = md5(serialize($excludeIds));
-        return $userCountry 
-            ? "latestJobs_country_{$userCountry}_exclude_{$excludeHash}" 
-            : "latestJobs_global_exclude_{$excludeHash}";
+        $version = (string) Cache::rememberForever(self::VERSION_KEY, fn () => '1');
+        $scope = $userCountry ? "country_{$userCountry}" : 'global';
+
+        return "latestJobs_{$scope}_limit_{$limit}_exclude_{$excludeHash}_v_{$version}";
     }
-} 
+}
