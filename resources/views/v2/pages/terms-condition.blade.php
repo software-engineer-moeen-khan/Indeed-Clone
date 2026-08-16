@@ -1,243 +1,93 @@
 @extends('v2.layouts.app')
+
 @section('content')
-    <!-- Hero Section -->
-    <section class="relative bg-gray-50 dark:bg-[#12122b] py-20">
-        <!-- Background Pattern -->
-        <div class="absolute inset-0 opacity-10"
-             style="background-image: url('https://placehold.co/1920x800/2a2a4a/FFFFFF'); background-size: cover;"></div>
+<section class="bg-white border-b border-[#e4e2e0]">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <p class="text-sm font-semibold text-[#2557a7] mb-3">LEGAL</p>
+        <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-[#2d2d2d]">Terms of Use</h1>
+        <p class="mt-4 text-[#595959] leading-7">These terms describe the rules that apply when you access or use Best Way Jobs.</p>
+        <p class="mt-3 text-sm text-[#767676]">Last updated: August 16, 2026</p>
+    </div>
+</section>
 
-        <div class="relative mx-auto max-w-7xl px-6">
-            <div class="text-center mb-12">
-                <h1 class="font-oxanium-bold text-5xl leading-tight text-gray-900 dark:text-white md:text-6xl mb-6">
-                    Terms of <span class="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-pink-500 dark:to-purple-500 bg-clip-text text-transparent">Service</span>
-                </h1>
-                <p class="font-sans text-xl leading-relaxed text-gray-600 dark:text-gray-100 max-w-3xl mx-auto">
-                    By accessing or using our platform, you agree to be bound by the following terms and conditions. Please read them carefully before using the site.
-                </p>
-                <div class="mt-6 text-gray-600 dark:text-gray-300">
-                    <span class="inline-flex items-center gap-2">
-                        <i class="las la-calendar text-blue-600 dark:text-pink-500"></i>
-                        Effective Date: April 16, 2025
-                    </span>
-                </div>
-            </div>
+<section class="bg-[#f7f7f7]">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+        <div class="indeed-card p-6 sm:p-10 space-y-10">
+            <section>
+                <h2 class="text-xl font-bold text-[#2d2d2d]">1. Using Best Way Jobs</h2>
+                <p class="mt-3 text-[#595959] leading-7">Best Way Jobs provides job discovery, search, filtering, profile and related platform features. By using the service, you agree to use it lawfully and in a way that does not interfere with other users or the operation of the website.</p>
+            </section>
+
+            <section>
+                <h2 class="text-xl font-bold text-[#2d2d2d]">2. Accounts</h2>
+                <p class="mt-3 text-[#595959] leading-7">If you create an account, you are responsible for providing accurate information, keeping your sign-in credentials secure and for activity carried out through your account. Do not share passwords or attempt to access another person's account.</p>
+            </section>
+
+            <section>
+                <h2 class="text-xl font-bold text-[#2d2d2d]">3. Acceptable use</h2>
+                <p class="mt-3 text-[#595959] leading-7">You must not use the platform to:</p>
+                <ul class="mt-3 list-disc pl-6 space-y-2 text-[#595959] leading-7">
+                    <li>Break applicable laws or regulations.</li>
+                    <li>Submit intentionally false, misleading or harmful information.</li>
+                    <li>Attempt unauthorized access to accounts, systems or data.</li>
+                    <li>Disrupt, overload, probe or bypass the security of the service.</li>
+                    <li>Use automated collection or scraping in a way that harms the platform or violates applicable rights.</li>
+                    <li>Impersonate another person, employer or organization.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2 class="text-xl font-bold text-[#2d2d2d]">4. Job listings</h2>
+                <p class="mt-3 text-[#595959] leading-7">Job information may be provided, imported or linked from different sources. Listings can change, expire or contain information controlled by an employer or third party. Best Way Jobs does not guarantee that every listing is complete, current or still available.</p>
+                <p class="mt-3 text-[#595959] leading-7">Users should independently review a role, employer and application destination before sharing personal information or making employment-related decisions.</p>
+            </section>
+
+            <section>
+                <h2 class="text-xl font-bold text-[#2d2d2d]">5. External application links</h2>
+                <p class="mt-3 text-[#595959] leading-7">A job's Apply button may send you to an employer or third-party website. Best Way Jobs does not control those sites, their availability, their application process, their content or their hiring decisions. Their own terms and privacy policies apply after you leave this website.</p>
+            </section>
+
+            <section>
+                <h2 class="text-xl font-bold text-[#2d2d2d]">6. No employment guarantee</h2>
+                <p class="mt-3 text-[#595959] leading-7">Best Way Jobs helps users discover opportunities but does not guarantee interviews, offers, employment, salary, employer responses or any particular outcome from using the platform.</p>
+            </section>
+
+            <section>
+                <h2 class="text-xl font-bold text-[#2d2d2d]">7. Platform availability</h2>
+                <p class="mt-3 text-[#595959] leading-7">Features may be changed, improved, suspended or removed as the service evolves. Although reasonable efforts may be made to keep the platform available, uninterrupted or error-free operation cannot be guaranteed.</p>
+            </section>
+
+            <section>
+                <h2 class="text-xl font-bold text-[#2d2d2d]">8. Intellectual property</h2>
+                <p class="mt-3 text-[#595959] leading-7">The Best Way Jobs name, interface, original platform content and related materials may be protected by intellectual-property laws. Third-party employer names, logos, job descriptions and other third-party materials remain subject to the rights of their respective owners.</p>
+            </section>
+
+            <section>
+                <h2 class="text-xl font-bold text-[#2d2d2d]">9. Privacy</h2>
+                <p class="mt-3 text-[#595959] leading-7">Use of the platform is also subject to the <a href="{{ route('privacy-policy') }}" class="indeed-link">Privacy Policy</a>, which explains how information may be processed when you use Best Way Jobs.</p>
+            </section>
+
+            <section>
+                <h2 class="text-xl font-bold text-[#2d2d2d]">10. Suspension or restriction</h2>
+                <p class="mt-3 text-[#595959] leading-7">Access may be restricted or suspended when reasonably necessary to protect the platform, users or third parties, or when an account materially violates these terms.</p>
+            </section>
+
+            <section>
+                <h2 class="text-xl font-bold text-[#2d2d2d]">11. Disclaimer and limitation</h2>
+                <p class="mt-3 text-[#595959] leading-7">The service is provided on an “as available” basis. To the extent permitted by applicable law, Best Way Jobs is not responsible for losses caused by reliance on inaccurate third-party job information, external websites, employer actions, application outcomes or interruptions outside the platform's reasonable control.</p>
+            </section>
+
+            <section>
+                <h2 class="text-xl font-bold text-[#2d2d2d]">12. Changes to these terms</h2>
+                <p class="mt-3 text-[#595959] leading-7">These terms may be updated when the platform or applicable requirements change. The latest version will be posted on this page with an updated date.</p>
+            </section>
+
+            <section class="border-t border-[#e4e2e0] pt-8">
+                <h2 class="text-xl font-bold text-[#2d2d2d]">13. Contact</h2>
+                <p class="mt-3 text-[#595959] leading-7">For questions about these terms, use the Best Way Jobs contact page.</p>
+                <a href="{{ route('contact') }}" class="btn-secondary inline-flex mt-5">Contact Best Way Jobs</a>
+            </section>
         </div>
-    </section>
-    <!-- Hero Section End -->
-
-    <!-- Terms of Service Content -->
-    <section class="bg-white dark:bg-[#0A0A1B] py-20">
-        <div class="mx-auto max-w-4xl px-6">
-            <div class="bg-white dark:bg-[#12122b] rounded-2xl p-8 md:p-12 border border-gray-200 dark:border-gray-800">
-                <!-- Overview -->
-                <div class="mb-12">
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/20 dark:bg-pink-500/20">
-                            <span class="text-blue-600 dark:text-pink-500">1</span>
-                        </div>
-                        Overview
-                    </h2>
-                    <div class="text-gray-700 dark:text-gray-300 space-y-4">
-                        <p>
-                            Geezap is a job aggregator that helps tech professionals discover relevant job opportunities across various external job boards. When a user clicks on a job listing, they are redirected to the original source to apply.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Eligibility -->
-                <div class="mb-12">
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/20 dark:bg-pink-500/20">
-                            <span class="text-blue-600 dark:text-pink-500">2</span>
-                        </div>
-                        Eligibility
-                    </h2>
-                    <div class="text-gray-700 dark:text-gray-300 space-y-4">
-                        <p>
-                            By using Geezap, you confirm that:
-                        </p>
-                        <ul class="list-disc pl-6 space-y-2">
-                            <li>You are at least 16 years of age.</li>
-                            <li>You have the legal capacity to enter into this agreement.</li>
-                            <li>All information you provide is accurate and up to date.</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- User Accounts -->
-                <div class="mb-12">
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/20 dark:bg-pink-500/20">
-                            <span class="text-blue-600 dark:text-pink-500">3</span>
-                        </div>
-                        User Accounts
-                    </h2>
-                    <div class="text-gray-700 dark:text-gray-300 space-y-4">
-                        <p>
-                            To access certain features (like saving profiles or tracking work experience), you may need to create an account. You are responsible for:
-                        </p>
-                        <ul class="list-disc pl-6 space-y-2">
-                            <li>Maintaining the confidentiality of your password.</li>
-                            <li>Ensuring all information in your profile is accurate.</li>
-                            <li>Not sharing your account or impersonating others.</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Use of Platform -->
-                <div class="mb-12">
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/20 dark:bg-pink-500/20">
-                            <span class="text-blue-600 dark:text-pink-500">4</span>
-                        </div>
-                        Use of Platform
-                    </h2>
-                    <div class="text-gray-700 dark:text-gray-300 space-y-4">
-                        <p>
-                            You agree not to:
-                        </p>
-                        <ul class="list-disc pl-6 space-y-2">
-                            <li>Use Geezap for unlawful or harmful purposes.</li>
-                            <li>Post false or misleading information.</li>
-                            <li>Attempt to access or collect data from other users.</li>
-                            <li>Use bots or automated systems to scrape or manipulate the site.</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Job Listings -->
-                <div class="mb-12">
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/20 dark:bg-pink-500/20">
-                            <span class="text-blue-600 dark:text-pink-500">5</span>
-                        </div>
-                        Job Listings
-                    </h2>
-                    <div class="text-gray-700 dark:text-gray-300 space-y-4">
-                        <p>
-                            Geezap does not post jobs directly. Job listings are:
-                        </p>
-                        <ul class="list-disc pl-6 space-y-2">
-                            <li>Aggregated from third-party sources.</li>
-                            <li>Subject to change or removal without notice.</li>
-                            <li>Owned by the respective external job boards.</li>
-                        </ul>
-                        <p class="mt-4">
-                            We are not responsible for the accuracy, completeness, or authenticity of any job post, nor the outcome of any application made through redirected links.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Intellectual Property -->
-                <div class="mb-12">
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/20 dark:bg-pink-500/20">
-                            <span class="text-blue-600 dark:text-pink-500">6</span>
-                        </div>
-                        Intellectual Property
-                    </h2>
-                    <div class="text-gray-700 dark:text-gray-300 space-y-4">
-                        <p>
-                            All content on Geezap—including design, branding, and layout—is the intellectual property of Geezap or its creator and may not be copied, reused, or reproduced without permission.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Data & Privacy -->
-                <div class="mb-12">
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/20 dark:bg-pink-500/20">
-                            <span class="text-blue-600 dark:text-pink-500">7</span>
-                        </div>
-                        Data & Privacy
-                    </h2>
-                    <div class="text-gray-700 dark:text-gray-300 space-y-4">
-                        <p>
-                            Your use of Geezap is also governed by our <a href="{{ route('privacy-policy') }}" class="text-blue-600 dark:text-pink-500 hover:text-blue-700 dark:hover:text-pink-600 transition">Privacy Policy</a>. We collect limited personal data to provide personalized experiences. We do not sell or share your data with employers or other users.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Account Termination -->
-                <div class="mb-12">
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/20 dark:bg-pink-500/20">
-                            <span class="text-blue-600 dark:text-pink-500">8</span>
-                        </div>
-                        Account Termination
-                    </h2>
-                    <div class="text-gray-700 dark:text-gray-300 space-y-4">
-                        <p>
-                            Geezap reserves the right to suspend or delete accounts that violate these terms or abuse the platform, with or without prior notice.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Limitation of Liability -->
-                <div class="mb-12">
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/20 dark:bg-pink-500/20">
-                            <span class="text-blue-600 dark:text-pink-500">9</span>
-                        </div>
-                        Limitation of Liability
-                    </h2>
-                    <div class="text-gray-700 dark:text-gray-300 space-y-4">
-                        <p>
-                            Geezap is provided "as-is." We do not guarantee:
-                        </p>
-                        <ul class="list-disc pl-6 space-y-2">
-                            <li>That jobs will be available at all times.</li>
-                            <li>That redirection links will always work or remain active.</li>
-                            <li>That any job application will result in employment.</li>
-                        </ul>
-                        <p class="mt-4">
-                            We are not liable for any direct or indirect damages resulting from your use of the platform.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Changes to Terms -->
-                <div class="mb-12">
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/20 dark:bg-pink-500/20">
-                            <span class="text-blue-600 dark:text-pink-500">10</span>
-                        </div>
-                        Changes to Terms
-                    </h2>
-                    <div class="text-gray-700 dark:text-gray-300 space-y-4">
-                        <p>
-                            We may update these Terms of Service at any time. Significant changes will be communicated via email or site notice. Continued use of the platform after changes constitutes your agreement to the new terms.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Contact -->
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/20 dark:bg-pink-500/20">
-                            <span class="text-blue-600 dark:text-pink-500">11</span>
-                        </div>
-                        Contact
-                    </h2>
-                    <div class="text-gray-700 dark:text-gray-300 space-y-4">
-                        <p>
-                            If you have any questions or concerns about these terms:
-                        </p>
-                        <div class="flex items-center gap-2 mt-4">
-                            <i class="las la-envelope text-blue-600 dark:text-pink-500"></i>
-                            <span>Email: <a href="mailto:contact@geezap.com" class="text-blue-600 dark:text-pink-500 hover:text-blue-700 dark:hover:text-pink-600 transition">contact@geezap.com</a></span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <i class="lab la-github text-blue-600 dark:text-pink-500"></i>
-                            <span>GitHub: <a href="https://github.com/theihasan" target="_blank" class="text-blue-600 dark:text-pink-500 hover:text-blue-700 dark:hover:text-pink-600 transition">github.com/theihasan</a></span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <i class="lab la-linkedin text-blue-600 dark:text-pink-500"></i>
-                            <span>LinkedIn: <a href="https://linkedin.com/in/theihasan" target="_blank" class="text-blue-600 dark:text-pink-500 hover:text-blue-700 dark:hover:text-pink-600 transition">linkedin.com/in/theihasan</a></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    </div>
+</section>
 @endsection
