@@ -2,6 +2,12 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Widgets\JobsByCategoryChart;
+use App\Filament\Widgets\PlatformGrowthChart;
+use App\Filament\Widgets\RecentJobs;
+use App\Filament\Widgets\RecentUsers;
+use App\Filament\Widgets\TopCountriesChart;
+use App\Filament\Widgets\TotalUser;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -26,18 +32,22 @@ class AdminPanelProvider extends PanelProvider
             ->id('geezap')
             ->path('geezap')
             ->login()
+            ->brandName('Best Way Jobs')
             ->colors([
-                'primary' => Color::Orange,
+                'primary' => Color::Blue,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                \App\Filament\Widgets\ContentProcessingStats::class,
-                \App\Filament\Widgets\JobsByCategoryChart::class,
+                TotalUser::class,
+                PlatformGrowthChart::class,
+                JobsByCategoryChart::class,
+                TopCountriesChart::class,
+                RecentJobs::class,
+                RecentUsers::class,
             ])
             ->middleware([
                 EncryptCookies::class,
