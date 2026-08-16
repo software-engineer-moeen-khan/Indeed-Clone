@@ -28,19 +28,18 @@ class HomePageController extends Controller
 
             $mostViewedJobs = CountryAwareMostViewedJobsCache::get($userCountry);
 
-            $latestJobs = CountryAwareLatestJobsCache::get(
-                $mostViewedJobs->pluck('id')->toArray(),
-                $userCountry
-            );
+            // Latest jobs must be independent from Popular/Most Viewed jobs.
+            // A newly-created job can legitimately appear in both sections.
+            $latestJobs = CountryAwareLatestJobsCache::get([], $userCountry, 6);
         } catch (\Throwable $e) {
             Log::warning('Country-aware cache failed on homepage, falling back to default', [
                 'error' => $e->getMessage(),
                 'memory_usage' => memory_get_usage(true),
-                'memory_peak' => memory_get_peak_usage(true)
+                'memory_peak' => memory_get_peak_usage(true),
             ]);
-            
+
             $mostViewedJobs = MostViewedJobsCache::get();
-            $latestJobs = LatestJobsCache::get($mostViewedJobs->pluck('id')->toArray());
+            $latestJobs = LatestJobsCache::get([], 6);
             $userCountry = null;
         }
 
