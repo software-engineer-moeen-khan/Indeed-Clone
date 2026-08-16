@@ -46,6 +46,8 @@ class Advertisement extends Model
             'jobs_above_results' => 'Jobs Page - Above Results',
             'jobs_after_results' => 'Jobs Page - Below Results',
             'job_details_top' => 'Job Details - Above Job Content',
+            'on_apply_now' => 'On Apply Now',
+            'on_find_jobs' => 'On Find Jobs',
             'global_before_footer' => 'Global - Before Footer',
         ];
     }
