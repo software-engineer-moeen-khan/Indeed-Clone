@@ -12,12 +12,11 @@
     <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-[#f3f2f1] text-[#2d2d2d] font-sans">
+<body class="auth-shell min-h-screen text-[#2d2d2d] font-sans">
     <header class="bg-white border-b border-[#e4e2e0]">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-            <a href="{{ route('home') }}" class="inline-flex items-center gap-2.5">
-                <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#2557a7] text-lg font-extrabold text-white">G</span>
-                <span class="text-xl font-extrabold tracking-tight text-[#2d2d2d]">Geezap</span>
+            <a href="{{ route('home') }}" class="text-xl font-extrabold tracking-[-0.04em] text-[#2d2d2d]">
+                Best Way <span class="text-[#2557a7]">Jobs</span>
             </a>
             <a href="{{ route('home') }}" class="text-sm font-semibold text-[#2557a7] hover:underline">Back to jobs</a>
         </div>
