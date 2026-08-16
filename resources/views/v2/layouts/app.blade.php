@@ -22,9 +22,17 @@
     @include('v2.partials.mobile-menu')
 </nav>
 
+<x-advertisement-slot placement="global_after_header" />
+
+@if(request()->routeIs('job.show'))
+    <x-advertisement-slot placement="job_details_top" />
+@endif
+
 <main>
     @yield('content')
 </main>
+
+<x-advertisement-slot placement="global_before_footer" />
 
 @include('v2.partials.footer')
 <x-notification />
