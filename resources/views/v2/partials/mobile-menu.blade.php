@@ -14,10 +14,7 @@
                     </div>
                 </div>
             @else
-                <div class="flex items-center gap-2.5">
-                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#2557a7] text-sm font-bold text-white">G</span>
-                    <span class="font-bold text-[#2d2d2d]">Geezap</span>
-                </div>
+                <span class="text-xl font-extrabold tracking-[-0.04em] text-[#2d2d2d]">Best Way <span class="text-[#2557a7]">Jobs</span></span>
             @endauth
 
             <button onclick="toggleMobileMenu()" class="w-10 h-10 rounded-lg hover:bg-[#f3f2f1] transition-colors flex items-center justify-center text-[#2d2d2d]" aria-label="Close menu">
@@ -66,7 +63,7 @@
                     Sign in
                 </a>
                 <a href="{{ route('register') }}" class="w-full bg-[#2557a7] hover:bg-[#164081] text-white px-5 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center">
-                    Sign up
+                    Create account
                 </a>
             @endauth
         </div>
