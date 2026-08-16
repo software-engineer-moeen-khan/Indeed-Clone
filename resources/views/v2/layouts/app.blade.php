@@ -1,5 +1,5 @@
 @include('v2.partials.header')
-<body class="bg-white text-[#2d2d2d] font-sans antialiased">
+<body class="bg-white text-[#2d2d2d] font-sans antialiased {{ request()->routeIs('job.show') ? 'job-detail-page' : '' }}">
 <nav class="public-nav sticky top-0 z-40">
     <div class="public-nav-inner px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center min-h-16">
