@@ -165,7 +165,6 @@ class JobListingResource extends Resource
                     ->multiple(),
                 Tables\Filters\TernaryFilter::make('is_remote')
                     ->label('Remote Only')
-                    ->default(false)
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
