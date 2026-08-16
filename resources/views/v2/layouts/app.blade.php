@@ -37,6 +37,9 @@
 @include('v2.partials.footer')
 <x-notification />
 
+<x-click-ad-modal placement="on_find_jobs" />
+<x-click-ad-modal placement="on_apply_now" />
+
 <button
     type="button"
     id="back-to-top"
