@@ -14,8 +14,6 @@ class PlatformGrowthChart extends ChartWidget
 {
     protected static ?string $heading = 'Platform Growth — Last 30 Days';
 
-    protected static ?string $description = 'Jobs published, user registrations and applications submitted.';
-
     protected static ?int $sort = 2;
 
     protected static ?string $pollingInterval = '60s';
@@ -23,6 +21,11 @@ class PlatformGrowthChart extends ChartWidget
     protected int|string|array $columnSpan = 'full';
 
     protected static ?string $maxHeight = '330px';
+
+    public function getDescription(): ?string
+    {
+        return 'Jobs published, user registrations and applications submitted.';
+    }
 
     protected function getData(): array
     {
