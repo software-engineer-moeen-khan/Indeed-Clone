@@ -74,6 +74,8 @@
     </div>
 </section>
 
+<x-advertisement-slot placement="home_below_search" />
+
 @guest
 <section class="py-8 border-b border-[#e4e2e0] bg-white">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -116,6 +118,8 @@
         </div>
     </div>
 </section>
+
+<x-advertisement-slot placement="home_after_latest" />
 
 <section class="py-10 sm:py-14 bg-white">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
