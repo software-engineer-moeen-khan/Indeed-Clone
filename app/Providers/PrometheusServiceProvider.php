@@ -15,9 +15,10 @@ class PrometheusServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(CollectorRegistry::class, function ($app) {
-            // Local development / Cloudflare Quick Tunnels should not require a
-            // native Redis extension or a running Redis server just to render pages.
-            if ($app->environment(['local', 'testing'])) {
+            // Shared hosting and local development may use file/database cache
+            // without a Redis service. Only use Prometheus Redis storage when
+            // the application's configured cache store is actually Redis.
+            if (config('cache.default') !== 'redis') {
                 return new CollectorRegistry(new InMemory());
             }
 
