@@ -93,12 +93,20 @@ class JobListingResource extends Resource
                 Forms\Components\Wizard\Step::make('Compensation')
                     ->schema([
                         Forms\Components\TextInput::make('min_salary')
+                            ->label('Minimum Salary')
                             ->numeric(),
                         Forms\Components\TextInput::make('max_salary')
+                            ->label('Maximum Salary')
                             ->numeric(),
                         Forms\Components\TextInput::make('salary_currency')
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('salary_period'),
+                            ->label('Salary Currency')
+                            ->placeholder('e.g. PKR, USD, EUR, £')
+                            ->helperText('This exact currency/code will be shown with the salary across the website.')
+                            ->dehydrateStateUsing(fn ($state) => is_string($state) ? trim($state) : $state)
+                            ->maxLength(16),
+                        Forms\Components\TextInput::make('salary_period')
+                            ->label('Salary Period')
+                            ->placeholder('e.g. month, year, hour'),
                         Forms\Components\TagsInput::make('benefits')
                             ->separator(';'),
                     ])->columns(2),
@@ -123,8 +131,6 @@ class JobListingResource extends Resource
             ])->skippable()
         ])->columns(1);
     }
-
-
 
     public static function table(Table $table): Table
     {
@@ -175,14 +181,10 @@ class JobListingResource extends Resource
                             return route('job.show', $record->slug);
                         })
                         ->openUrlInNewTab(),
-
-                    //Did not decided
-                    //Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make()
                 ])
             ])
-
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
@@ -206,5 +208,4 @@ class JobListingResource extends Resource
             'view' => Pages\ViewJob::route('/{record}'),
         ];
     }
-
 }
