@@ -6,8 +6,8 @@ use App\Caches\CountryAwareJobPageCache;
 use App\Caches\JobListingCache;
 use App\Caches\JobPageCache;
 use App\Caches\JobViewsCache;
-use App\Caches\RelatedJobListingCache;
 use App\Caches\ImprovedRelatedJobListingCache;
+use App\Models\Country;
 use App\Services\SearchSuggestionService;
 use App\Services\SeoMetaService;
 use App\Traits\DetectsUserCountry;
@@ -15,8 +15,8 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class JobController extends Controller
 {
@@ -27,9 +27,8 @@ class JobController extends Controller
         try {
             $userCountry = $this->getUserCountry();
 
-            // Development helper: simulate CloudFlare header for testing
             if (app()->environment('local') && ! $userCountry) {
-                $userCountry = 'BD'; // Simulate Bangladesh for testing
+                $userCountry = 'BD';
             }
 
             $jobs = CountryAwareJobPageCache::get($request, $userCountry);
@@ -44,13 +43,13 @@ class JobController extends Controller
             $userCountry = null;
         }
 
-        // Track search if there's a query
-        if ($request->has('search') && ! empty($request->search)) {
+        if ($request->filled('search')) {
             try {
                 $appliedFilters = array_filter([
+                    'city' => $request->city,
+                    'country' => $request->country,
                     'category' => $request->category,
                     'remote' => $request->remote,
-                    'country' => $request->country,
                     'types' => $request->types,
                 ]);
 
@@ -70,11 +69,16 @@ class JobController extends Controller
 
         $currentPage = $jobs->currentPage();
         $meta = $seoService->generateJobsIndexMeta($request, $jobs->total());
+        $countries = Country::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['name', 'code']);
 
         return view('v2.job.index', [
             'jobs' => $jobs,
             'currentPage' => $currentPage,
             'userCountry' => $userCountry,
+            'countries' => $countries,
             'meta' => $meta,
         ]);
     }
