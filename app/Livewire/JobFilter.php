@@ -8,6 +8,7 @@ use App\Models\JobCategory;
 use App\Models\JobListing;
 use App\Traits\DetectsUserCountry;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Url;
@@ -257,7 +258,8 @@ class JobFilter extends Component
                         ->get();
                 } else {
                     $searchResults = $searchQuery->paginate($perPage);
-                    $jobs = collect($searchResults->items())->load('category');
+                    $jobs = EloquentCollection::make($searchResults->items());
+                    $jobs->load('category');
                     $total = $searchResults->total();
                 }
             } else {
