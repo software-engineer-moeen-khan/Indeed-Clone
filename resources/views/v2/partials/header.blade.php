@@ -40,7 +40,7 @@
     <meta property="og:title" content="{{ $meta->og->title }}">
     <meta property="og:description" content="{{ $meta->og->description }}">
     <meta property="og:image" content="{{ $meta->og->image ?? asset('assets/images/favicon.ico') }}">
-    <meta property="og:site_name" content="Geezap">
+    <meta property="og:site_name" content="Best Way Jobs">
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="{{ url()->current() }}">
