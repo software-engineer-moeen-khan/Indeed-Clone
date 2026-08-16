@@ -9,13 +9,16 @@ class TopCountriesChart extends ChartWidget
 {
     protected static ?string $heading = 'Top Hiring Countries';
 
-    protected static ?string $description = 'Countries with the highest number of active job listings.';
-
     protected static ?int $sort = 4;
 
     protected int|string|array $columnSpan = 1;
 
     protected static ?string $maxHeight = '320px';
+
+    public function getDescription(): ?string
+    {
+        return 'Countries with the highest number of active job listings.';
+    }
 
     protected function getData(): array
     {
