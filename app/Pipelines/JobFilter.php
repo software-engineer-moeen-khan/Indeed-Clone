@@ -2,55 +2,65 @@
 
 namespace App\Pipelines;
 
-use App\Enums\JobType;
+use App\Models\Country;
 use Closure;
 
 class JobFilter
 {
     public function handle($jobs, Closure $next)
     {
-        // Search job by keywords
-        $jobs->when(request()->get('search'), function ($query, $keyword) {
-            $query->where('job_title', 'like', '%' . $keyword . '%');
+        $jobs->when(request()->filled('search'), function ($query) {
+            $keyword = trim((string) request()->get('search'));
+
+            $query->where(function ($searchQuery) use ($keyword) {
+                $searchQuery
+                    ->where('job_title', 'like', "%{$keyword}%")
+                    ->orWhere('employer_name', 'like', "%{$keyword}%")
+                    ->orWhere('description', 'like', "%{$keyword}%")
+                    ->orWhere('publisher', 'like', "%{$keyword}%");
+            });
         });
 
-        // Filter by city
-        $jobs->when(request()->get('location'), function ($query, $location) {
-            $query->where('city', 'like', '%' . $location . '%');
+        $jobs->when(request()->filled('city'), function ($query) {
+            $city = trim((string) request()->get('city'));
+            $query->where('city', 'like', "%{$city}%");
         });
 
-        // Filter by country
-        $jobs->when(request()->get('country'), function ($query, $country) {
-            $query->where('country', $country);
+        $jobs->when(request()->filled('country'), function ($query) {
+            $countryInput = trim((string) request()->get('country'));
+            $country = Country::query()
+                ->where('code', strtoupper($countryInput))
+                ->orWhere('name', $countryInput)
+                ->first(['code']);
+
+            $query->where('country', $country?->code ?? $countryInput);
         });
 
-
-        // Filter by category
-        $jobs->when(request()->get('category'), function ($query, $category) {
-            $query->whereRelation('category', 'id', $category);
+        $jobs->when(request()->filled('category'), function ($query) {
+            $query->where('job_category', request()->get('category'));
         });
 
-        // Filter by job type
         $jobs->when(request()->filled('types'), function ($query) {
-            $jobTypes = explode(',', request()->get('types', []));
-            $query->whereIn('employment_type', $jobTypes);
+            $types = request()->get('types', []);
+
+            if (is_string($types)) {
+                $types = array_filter(explode(',', $types));
+            }
+
+            $query->whereIn('employment_type', (array) $types);
         });
 
-        //Filter by job source
-        $jobs->when(request()->get('source'), function ($query, $source) {
-            $query->where('publisher', $source);
+        $jobs->when(request()->filled('source'), function ($query) {
+            $query->where('publisher', request()->get('source'));
         });
 
-        // Exclude job source
-        $jobs->when(request()->get('exclude_source'), function ($query, $excludeSource) {
-            $query->where('publisher', '!=', $excludeSource);
+        $jobs->when(request()->filled('exclude_source'), function ($query) {
+            $query->where('publisher', '!=', request()->get('exclude_source'));
         });
 
-
-        // Filter by remote status
-        $jobs->when(request()->filled('remote'), function ($query) {
-            $query->where('is_remote', true);
-        });
+        if (request()->boolean('remote')) {
+            $jobs->where('is_remote', true);
+        }
 
         return $next($jobs);
     }
