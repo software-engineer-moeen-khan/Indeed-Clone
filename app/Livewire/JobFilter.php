@@ -189,27 +189,29 @@ class JobFilter extends Component
             Log::warning('Failed to get countries from cache', ['error' => $e->getMessage()]);
 
             return Country::query()
-                ->where('is_active', true)
                 ->orderBy('name')
                 ->get()
                 ->keyBy('code');
         }
     }
 
-    protected function resolveCountryCode(string $value): string
+    protected function resolveCountry(string $value): array
     {
         $value = trim($value);
 
         if ($value === '') {
-            return '';
+            return ['', ''];
         }
 
         $country = Country::query()
-            ->where('code', strtoupper($value))
-            ->orWhere('name', $value)
-            ->first(['code']);
+            ->whereRaw('UPPER(code) = ?', [strtoupper($value)])
+            ->orWhereRaw('LOWER(name) = ?', [mb_strtolower($value)])
+            ->first(['code', 'name']);
 
-        return $country?->code ?? $value;
+        return [
+            strtoupper((string) ($country?->code ?? $value)),
+            (string) ($country?->name ?? $value),
+        ];
     }
 
     protected function buildQuery(): Builder
@@ -234,7 +236,13 @@ class JobFilter extends Component
 
         $country = trim((string) $this->country);
         if ($country !== '') {
-            $query->where('country', $this->resolveCountryCode($country));
+            [$countryCode, $countryName] = $this->resolveCountry($country);
+
+            $query->where(function (Builder $countryQuery) use ($countryCode, $countryName) {
+                $countryQuery
+                    ->whereRaw('UPPER(country) = ?', [$countryCode])
+                    ->orWhereRaw('LOWER(country) = ?', [mb_strtolower($countryName)]);
+            });
         }
 
         if ($this->category !== '') {
