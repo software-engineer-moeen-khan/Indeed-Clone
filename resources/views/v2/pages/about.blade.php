@@ -1,261 +1,87 @@
 @extends('v2.layouts.app')
+
 @section('content')
-    <!-- Hero Section -->
-    <section class="relative bg-gray-50 dark:bg-[#12122b] py-20">
-        <!-- Background Pattern -->
-        <div class="absolute inset-0 opacity-10"
-             style="background-image: url('https://placehold.co/1920x800/2a2a4a/FFFFFF'); background-size: cover;"></div>
+<section class="bg-white border-b border-[#e4e2e0]">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <div class="max-w-3xl">
+            <p class="text-sm font-semibold text-[#2557a7] mb-3">ABOUT BEST WAY JOBS</p>
+            <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-[#2d2d2d]">A simpler way to discover job opportunities</h1>
+            <p class="mt-5 text-lg leading-8 text-[#595959]">
+                Best Way Jobs is a job discovery platform designed to help job seekers search, filter, review and access relevant opportunities without unnecessary clutter.
+            </p>
+        </div>
+    </div>
+</section>
 
-        <div class="relative mx-auto max-w-7xl px-6">
-            <div class="text-center mb-12">
-                <h1 class="font-oxanium-bold text-5xl leading-tight text-gray-900 dark:text-white md:text-6xl mb-6">
-                    About <span class="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-pink-500 dark:to-purple-500 bg-clip-text text-transparent">Geezap</span>
-                </h1>
-                <p class="font-sans text-xl leading-relaxed text-gray-600 dark:text-gray-100 max-w-3xl mx-auto">
-                    Empowering technology professionals by making the job search smarter, faster, and more personal.
-                </p>
+<section class="bg-[#f7f7f7]">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+        <div class="grid gap-6 md:grid-cols-3">
+            <div class="indeed-card p-6">
+                <div class="w-10 h-10 rounded-lg bg-[#eef4fb] text-[#2557a7] flex items-center justify-center mb-4">
+                    <i class="las la-search text-xl"></i>
+                </div>
+                <h2 class="text-lg font-bold text-[#2d2d2d]">Search clearly</h2>
+                <p class="mt-2 text-sm leading-6 text-[#595959]">Search by job title, keywords, company, city, country, category and other practical filters.</p>
+            </div>
+
+            <div class="indeed-card p-6">
+                <div class="w-10 h-10 rounded-lg bg-[#eef4fb] text-[#2557a7] flex items-center justify-center mb-4">
+                    <i class="las la-briefcase text-xl"></i>
+                </div>
+                <h2 class="text-lg font-bold text-[#2d2d2d]">Compare opportunities</h2>
+                <p class="mt-2 text-sm leading-6 text-[#595959]">Review employer, location, employment type, compensation and job details in a consistent format.</p>
+            </div>
+
+            <div class="indeed-card p-6">
+                <div class="w-10 h-10 rounded-lg bg-[#eef4fb] text-[#2557a7] flex items-center justify-center mb-4">
+                    <i class="las la-user-check text-xl"></i>
+                </div>
+                <h2 class="text-lg font-bold text-[#2d2d2d]">Stay organized</h2>
+                <p class="mt-2 text-sm leading-6 text-[#595959]">Registered users can use profile and application-related features available on the platform.</p>
             </div>
         </div>
-    </section>
-    <!-- Hero Section End -->
+    </div>
+</section>
 
-    <!-- Our Mission Section -->
-    <section class="bg-white dark:bg-[#0A0A1B] py-20">
-        <div class="mx-auto max-w-7xl px-6">
-            <div class="grid md:grid-cols-2 gap-12 items-center">
-                <div>
-                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Mission</h2>
-                    <p class="text-gray-600 dark:text-gray-300 text-lg leading-relaxed mb-6">
-                        At Geezap, I'm on a mission to empower technology professionals by making the job search smarter, faster, and more personal. Everyone working in tech—from developers and data scientists to designers and CAD engineers—deserves access to the right opportunity.
-                    </p>
-                </div>
-                <div class="relative">
-                    <img src="https://placehold.co/600x400/2a2a4a/FFFFFF" alt="Our Mission" class="rounded-2xl shadow-2xl" loading="lazy">
-                    <div class="absolute -left-6 -top-6 rounded-xl border border-gray-200 dark:border-white/10 bg-white/90 dark:bg-[#1a1a3a]/90 p-4 backdrop-blur-sm">
-                        <div class="flex items-center gap-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20 dark:bg-pink-500/20">
-                                <i class="las la-rocket text-blue-600 dark:text-pink-500"></i>
-                            </div>
-                            <div>
-                                <div class="font-medium text-gray-900 dark:text-white">Our Mission</div>
-                                <div class="text-sm text-gray-600 dark:text-gray-400">Tech-Professional-First</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Who I Am Section -->
-    <section class="bg-gray-50 dark:bg-[#12122b] py-20">
-        <div class="mx-auto max-w-7xl px-6">
-            <div class="grid md:grid-cols-2 gap-12 items-center">
-                <div class="order-2 md:order-1 relative">
-                    <img src="https://avatars.githubusercontent.com/u/142471724?v=4" alt="Md. Abul Hassan" class="rounded-2xl shadow-2xl" loading="lazy">
-                    <div class="absolute -right-6 -bottom-6 rounded-xl border border-gray-200 dark:border-white/10 bg-white/90 dark:bg-[#1a1a3a]/90 p-4 backdrop-blur-sm">
-                        <div class="flex items-center gap-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20 dark:bg-purple-500/20">
-                                <i class="las la-code text-blue-600 dark:text-purple-500"></i>
-                            </div>
-                            <div>
-                                <div class="font-medium text-gray-900 dark:text-white">Software Engineer</div>
-                                <div class="text-sm text-gray-600 dark:text-gray-400">Open-Source Enthusiast</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="order-1 md:order-2">
-                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Who I Am</h2>
-                    <p class="text-gray-600 dark:text-gray-300 text-lg leading-relaxed mb-6">
-                        I'm Md. Abul Hassan —software engineer, open‑source enthusiast, and sole creator of Geezap. Frustrated by fragmented job boards and endless keyword searches, I built Geezap to centralize tech‑role listings in one clean, curated experience.
-                    </p>
-                    <div class="space-y-4">
-                        <div class="flex items-center gap-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20 dark:bg-pink-500/20">
-                                <i class="las la-map-marker text-blue-600 dark:text-pink-500"></i>
-                            </div>
-                            <div class="text-gray-600 dark:text-gray-300">
-                                <span class="font-medium text-gray-900 dark:text-white">Location:</span> Remote‑first (currently based in Dhaka)
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20 dark:bg-pink-500/20">
-                                <i class="lab la-github text-blue-600 dark:text-pink-500"></i>
-                            </div>
-                            <div class="text-gray-600 dark:text-gray-300">
-                                <span class="font-medium text-gray-900 dark:text-white">GitHub:</span>
-                                <a href="https://github.com/theihasan" target="_blank" class="text-blue-600 dark:text-pink-400 hover:text-blue-700 dark:hover:text-pink-500 transition">github.com/theihasan</a>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20 dark:bg-pink-500/20">
-                                <i class="lab la-linkedin text-blue-600 dark:text-pink-500"></i>
-                            </div>
-                            <div class="text-gray-600 dark:text-gray-300">
-                                <span class="font-medium text-gray-900 dark:text-white">LinkedIn:</span>
-                                <a href="https://linkedin.com/in/theihasan" target="_blank" class="text-blue-600 dark:text-pink-400 hover:text-blue-700 dark:hover:text-pink-500 transition">linkedin.com/in/theihasan</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- What Geezap Does Section -->
-    <section class="bg-white dark:bg-[#0A0A1B] py-20">
-        <div class="mx-auto max-w-7xl px-6">
-            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-12 text-center">What Geezap Does</h2>
-
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="group rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#1a1a3a] p-8 transition hover:border-blue-500/50 dark:hover:border-pink-500/50">
-                    <div class="mb-6 flex h-16 w-16 items-center justify-center rounded-xl bg-blue-500/10 dark:bg-pink-500/10 group-hover:bg-blue-500/20 dark:group-hover:bg-pink-500/20">
-                        <i class="las la-search text-3xl text-blue-600 dark:text-pink-500"></i>
-                    </div>
-                    <h3 class="mb-4 text-2xl font-semibold text-gray-900 dark:text-white">Aggregate</h3>
-                    <ul class="space-y-3 text-gray-700 dark:text-gray-300">
-                        <li class="flex items-start gap-2">
-                            <i class="las la-check-circle text-blue-600 dark:text-pink-500 mt-1"></i>
-                            <span>Crawl hundreds of sources in real‑time so you never miss a newly posted role.</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i class="las la-check-circle text-blue-600 dark:text-pink-500 mt-1"></i>
-                            <span>Deduplicate identical listings while preserving each original apply link.</span>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="group rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#1a1a3a] p-8 transition hover:border-blue-500/50 dark:hover:border-pink-500/50">
-                    <div class="mb-6 flex h-16 w-16 items-center justify-center rounded-xl bg-blue-500/10 dark:bg-pink-500/10 group-hover:bg-blue-500/20 dark:group-hover:bg-pink-500/20">
-                        <i class="las la-tags text-3xl text-blue-600 dark:text-pink-500"></i>
-                    </div>
-                    <h3 class="mb-4 text-2xl font-semibold text-gray-900 dark:text-white">Enrich</h3>
-                    <ul class="space-y-3 text-gray-700 dark:text-gray-300">
-                        <li class="flex items-start gap-2">
-                            <i class="las la-check-circle text-blue-600 dark:text-pink-500 mt-1"></i>
-                            <span>Tag every job with core and adjacent skills (e.g., React, Docker, GraphQL).</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i class="las la-check-circle text-blue-600 dark:text-pink-500 mt-1"></i>
-                            <span>(Coming soon) "For You" Feed: AI‑driven recommendations that learn from your clicks, saves, and applications.</span>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="group rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#1a1a3a] p-8 transition hover:border-blue-500/50 dark:hover:border-pink-500/50">
-                    <div class="mb-6 flex h-16 w-16 items-center justify-center rounded-xl bg-blue-500/10 dark:bg-pink-500/10 group-hover:bg-blue-500/20 dark:group-hover:bg-pink-500/20">
-                        <i class="las la-paper-plane text-3xl text-blue-600 dark:text-pink-500"></i>
-                    </div>
-                    <h3 class="mb-4 text-2xl font-semibold text-gray-900 dark:text-white">Apply</h3>
-                    <ul class="space-y-3 text-gray-700 dark:text-gray-300">
-                        <li class="flex items-start gap-2">
-                            <i class="las la-check-circle text-blue-600 dark:text-pink-500 mt-1"></i>
-                            <span>One‑click "Apply" buttons redirect you to the original job board where the role was posted.</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i class="las la-check-circle text-blue-600 dark:text-pink-500 mt-1"></i>
-                            <span>No résumé uploads, no middlemen—direct connection to employers.</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- My Values Section -->
-    <section class="bg-gray-50 dark:bg-[#12122b] py-20">
-        <div class="mx-auto max-w-7xl px-6">
-            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-12 text-center">Geezap Values</h2>
-
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="rounded-2xl bg-white dark:bg-[#1a1a3a] p-8 border border-gray-200 dark:border-gray-700 hover:border-blue-500/50 dark:hover:border-pink-500/50 transition">
-                    <div class="mb-6 flex h-16 w-16 items-center justify-center rounded-xl bg-blue-500/10 dark:bg-pink-500/10">
-                        <i class="las la-users text-3xl text-blue-600 dark:text-pink-500"></i>
-                    </div>
-                    <h3 class="mb-4 text-2xl font-semibold text-gray-900 dark:text-white">Tech-Professional-First</h3>
-                    <p class="text-gray-700 dark:text-gray-300">
-                        Every feature and design choice is driven by what benefits all technology professionals—developers, data scientists, designers, CAD engineers, and more.
-                    </p>
-                </div>
-
-                <div class="rounded-2xl bg-white dark:bg-[#1a1a3a] p-8 border border-gray-200 dark:border-gray-700 hover:border-blue-500/50 dark:hover:border-pink-500/50 transition">
-                    <div class="mb-6 flex h-16 w-16 items-center justify-center rounded-xl bg-blue-500/10 dark:bg-pink-500/10">
-                        <i class="las la-feather text-3xl text-blue-600 dark:text-pink-500"></i>
-                    </div>
-                    <h3 class="mb-4 text-2xl font-semibold text-gray-900 dark:text-white">Simplicity</h3>
-                    <p class="text-gray-700 dark:text-gray-300">
-                        A clean interface and straightforward workflows—no clutter, no distractions. Focus on what matters most: finding your next opportunity.
-                    </p>
-                </div>
-
-                <div class="rounded-2xl bg-white dark:bg-[#1a1a3a] p-8 border border-gray-200 dark:border-gray-700 hover:border-blue-500/50 dark:hover:border-pink-500/50 transition">
-                    <div class="mb-6 flex h-16 w-16 items-center justify-center rounded-xl bg-blue-500/10 dark:bg-pink-500/10">
-                        <i class="las la-shield-alt text-3xl text-blue-600 dark:text-pink-500"></i>
-                    </div>
-                    <h3 class="mb-4 text-2xl font-semibold text-gray-900 dark:text-white">Privacy</h3>
-                    <p class="text-gray-700 dark:text-gray-300">
-                        Your data is yours. Geezap never sells personal information and uses only privacy‑first analytics to improve the platform.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Get In Touch Section -->
-    <section class="bg-white dark:bg-[#0A0A1B] py-20">
-        <div class="mx-auto max-w-7xl px-6">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Get In Touch</h2>
-                <p class="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto">
-                    I'm always open to feedback, suggestions, or just a chat about all things tech.
-                </p>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                <div class="rounded-2xl bg-gray-50 dark:bg-[#12122b] p-8 border border-gray-200 dark:border-gray-700 hover:border-blue-500/50 dark:hover:border-pink-500/50 transition flex items-center gap-4">
-                    <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-500/10 dark:bg-pink-500/10">
-                        <i class="las la-envelope text-2xl text-blue-600 dark:text-pink-500"></i>
+<section class="bg-white">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+        <div class="grid gap-10 lg:grid-cols-[1.4fr_0.8fr]">
+            <div>
+                <h2 class="text-2xl font-bold text-[#2d2d2d]">How Best Way Jobs works</h2>
+                <div class="mt-6 space-y-6 text-[#595959] leading-7">
+                    <div>
+                        <h3 class="font-bold text-[#2d2d2d]">1. Find relevant roles</h3>
+                        <p class="mt-1">Use search and filters to narrow job listings to the opportunities that fit what you are looking for.</p>
                     </div>
                     <div>
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-1">Email</h3>
-                        <a href="mailto:contact@geezap.com" class="text-blue-600 dark:text-pink-400 hover:text-blue-700 dark:hover:text-pink-500 transition">contact@geezap.com</a>
-                    </div>
-                </div>
-
-                <div class="rounded-2xl bg-gray-50 dark:bg-[#12122b] p-8 border border-gray-200 dark:border-gray-700 hover:border-blue-500/50 dark:hover:border-pink-500/50 transition flex items-center gap-4">
-                    <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-500/10 dark:bg-pink-500/10">
-                        <i class="lab la-github text-2xl text-blue-600 dark:text-pink-500"></i>
+                        <h3 class="font-bold text-[#2d2d2d]">2. Review the details</h3>
+                        <p class="mt-1">Open a listing to review the role, company information, location, requirements and available application options.</p>
                     </div>
                     <div>
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-1">GitHub Issues</h3>
-                        <a href="https://github.com/theihasan/geezap" target="_blank" class="text-blue-600 dark:text-pink-400 hover:text-blue-700 dark:hover:text-pink-500 transition">github.com/theihasan/geezap</a>
+                        <h3 class="font-bold text-[#2d2d2d]">3. Apply through the available link</h3>
+                        <p class="mt-1">Some listings may direct you to an employer or third-party website. Those external websites operate under their own terms and privacy practices.</p>
                     </div>
                 </div>
             </div>
+
+            <aside class="indeed-card p-6 h-fit">
+                <h2 class="text-lg font-bold text-[#2d2d2d]">What matters to us</h2>
+                <ul class="mt-4 space-y-3 text-sm text-[#595959]">
+                    <li class="flex gap-3"><i class="las la-check text-[#2557a7] mt-1"></i><span>Useful search and filtering</span></li>
+                    <li class="flex gap-3"><i class="las la-check text-[#2557a7] mt-1"></i><span>Readable job information</span></li>
+                    <li class="flex gap-3"><i class="las la-check text-[#2557a7] mt-1"></i><span>Simple, consistent navigation</span></li>
+                    <li class="flex gap-3"><i class="las la-check text-[#2557a7] mt-1"></i><span>Respect for user information</span></li>
+                </ul>
+            </aside>
         </div>
-    </section>
 
-    <!-- CTA Section -->
-    <section class="bg-gray-50 dark:bg-[#12122b] py-20">
-        <div class="mx-auto max-w-7xl px-6">
-            <div class="rounded-2xl bg-gradient-to-r from-blue-500/20 dark:from-pink-500/20 to-blue-600/20 dark:to-purple-600/20 p-12 border border-gray-200 dark:border-white/10 relative overflow-hidden">
-                <!-- Background Pattern -->
-                <div class="absolute inset-0 opacity-10"
-                     style="background-image: url('https://placehold.co/1920x800/2a2a4a/FFFFFF'); background-size: cover;"></div>
-
-                <div class="relative text-center max-w-3xl mx-auto">
-                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Ready to Find Your Next Tech Role?</h2>
-                    <p class="text-gray-600 dark:text-gray-300 text-lg mb-8">
-                        Join thousands of tech professionals who have found their perfect roles through Geezap.
-                    </p>
-                    <a href="{{ route('job.index') }}"
-                       class="font-sans inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 dark:from-pink-500 dark:to-purple-600 px-8 py-4 text-lg font-medium text-white transition-opacity hover:opacity-90">
-                        Browse Jobs
-                        <i class="las la-arrow-right"></i>
-                    </a>
-                </div>
+        <div class="mt-12 border-t border-[#e4e2e0] pt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h2 class="text-xl font-bold text-[#2d2d2d]">Ready to explore opportunities?</h2>
+                <p class="mt-1 text-[#595959]">Browse the latest jobs available on Best Way Jobs.</p>
             </div>
+            <a href="{{ route('job.index') }}" class="btn-primary shrink-0">Find jobs</a>
         </div>
-    </section>
+    </div>
+</section>
 @endsection
