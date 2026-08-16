@@ -1,9 +1,9 @@
 @include('v2.partials.header')
 <body class="bg-white text-[#2d2d2d] font-sans antialiased">
-<nav class="sticky top-0 z-40 bg-white border-b border-[#e4e2e0]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-            <div class="flex items-center gap-8">
+<nav class="public-nav sticky top-0 z-40">
+    <div class="public-nav-inner px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center min-h-16">
+            <div class="flex items-center gap-6 lg:gap-8">
                 @include('v2.partials.logo')
                 @include('v2.partials.desktop-menu')
             </div>
