@@ -26,11 +26,11 @@
         {{-- Compact Job Details Row --}}
         <div class="flex items-center justify-between mt-2 text-xs text-gray-600 dark:text-gray-400">
             <div class="flex items-center gap-4">
-                @if ($job->min_salary && $job->max_salary)
+                @if ($job->formatted_salary)
                     <div class="flex items-center gap-1">
-                        <i class="las la-dollar-sign text-blue-600 dark:text-pink-300"></i>
+                        <i class="las la-money-bill-wave text-blue-600 dark:text-pink-300"></i>
                         <span class="text-blue-600 dark:text-pink-300 font-medium">
-                            ${{ \App\Helpers\NumberFormatter::formatNumber($job->min_salary) }} - ${{ \App\Helpers\NumberFormatter::formatNumber($job->max_salary) }}
+                            {{ $job->formatted_salary }}
                         </span>
                     </div>
                 @endif
