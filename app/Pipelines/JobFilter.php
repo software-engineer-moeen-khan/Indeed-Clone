@@ -29,11 +29,18 @@ class JobFilter
         $jobs->when(request()->filled('country'), function ($query) {
             $countryInput = trim((string) request()->get('country'));
             $country = Country::query()
-                ->where('code', strtoupper($countryInput))
-                ->orWhere('name', $countryInput)
-                ->first(['code']);
+                ->whereRaw('UPPER(code) = ?', [strtoupper($countryInput)])
+                ->orWhereRaw('LOWER(name) = ?', [mb_strtolower($countryInput)])
+                ->first(['code', 'name']);
 
-            $query->where('country', $country?->code ?? $countryInput);
+            $countryCode = strtoupper((string) ($country?->code ?? $countryInput));
+            $countryName = (string) ($country?->name ?? $countryInput);
+
+            $query->where(function ($countryQuery) use ($countryCode, $countryName) {
+                $countryQuery
+                    ->whereRaw('UPPER(country) = ?', [$countryCode])
+                    ->orWhereRaw('LOWER(country) = ?', [mb_strtolower($countryName)]);
+            });
         });
 
         $jobs->when(request()->filled('category'), function ($query) {
