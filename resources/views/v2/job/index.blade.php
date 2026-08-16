@@ -4,7 +4,7 @@
 <section class="job-results-page">
     <div class="border-b border-[#e4e2e0] bg-white">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <form action="{{ route('job.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.2fr_0.8fr_0.8fr_auto] gap-3 items-end">
+            <form action="{{ route('job.index') }}" method="GET" data-click-ad-placement="on_find_jobs" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.2fr_0.8fr_0.8fr_auto] gap-3 items-end">
                 <div class="indeed-search-field">
                     <label for="jobs-search">What</label>
                     <i class="las la-search"></i>
