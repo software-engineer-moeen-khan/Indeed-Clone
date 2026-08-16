@@ -4,7 +4,7 @@
 <section class="job-results-page">
     <div class="border-b border-[#e4e2e0] bg-white">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <form action="{{ route('job.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-[1fr_0.75fr_auto] gap-3 items-end">
+            <form action="{{ route('job.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.2fr_0.8fr_0.8fr_auto] gap-3 items-end">
                 <div class="indeed-search-field">
                     <label for="jobs-search">What</label>
                     <i class="las la-search"></i>
@@ -19,16 +19,29 @@
                 </div>
 
                 <div class="indeed-search-field">
-                    <label for="jobs-location">Where</label>
-                    <i class="las la-map-marker-alt"></i>
+                    <label for="jobs-city">City</label>
+                    <i class="las la-city"></i>
                     <input
-                        id="jobs-location"
+                        id="jobs-city"
                         type="text"
-                        name="location"
-                        value="{{ request('location') }}"
+                        name="city"
+                        value="{{ request('city') }}"
                         class="indeed-input"
-                        placeholder="City or location"
+                        placeholder="e.g. Lahore"
                     >
+                </div>
+
+                <div class="indeed-search-field">
+                    <label for="jobs-country">Country</label>
+                    <i class="las la-globe"></i>
+                    <select id="jobs-country" name="country" class="indeed-input appearance-none">
+                        <option value="">All countries</option>
+                        @foreach($countries as $countryOption)
+                            <option value="{{ $countryOption->code }}" @selected(request('country') === $countryOption->code)>
+                                {{ $countryOption->name }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <button type="submit" class="btn-primary min-h-[52px] px-7">Find jobs</button>
