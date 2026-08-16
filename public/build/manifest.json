@@ -1,0 +1,20 @@
+{
+  "_vendor.CT4b5Muw.js": {
+    "file": "assets/vendor.CT4b5Muw.js",
+    "name": "vendor"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app.HEhz2akG.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app.LbzYcytK.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "imports": [
+      "_vendor.CT4b5Muw.js"
+    ]
+  }
+}
