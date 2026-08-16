@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Caches\CountryJobCountCache;
 use App\Caches\JobCategoryCache;
+use App\Caches\JobFilterCache;
 use App\Caches\JobsCountCache;
 use App\Caches\CountryAwareMostViewedJobsCache;
 use App\Caches\MostViewedJobsCache;
@@ -35,9 +36,6 @@ class HomePageController extends Controller
             $userCountry = null;
         }
 
-        // Always read Latest Jobs directly from the database so a job created in
-        // the admin panel appears immediately. Do not exclude Popular jobs and do
-        // not cache this small six-record query.
         $latestJobs = JobListing::query()
             ->with('category')
             ->orderByDesc('created_at')
@@ -51,6 +49,7 @@ class HomePageController extends Controller
         $jobCategoriesCount = JobsCountCache::categoriesCount();
         $availableJobs = JobsCountCache::availableJobsCount();
         $topCountries = CountryJobCountCache::getTopCountries(10);
+        $searchCountries = JobFilterCache::getCountries()->sortBy('name');
 
         $meta = $seoService->generateHomePageMeta(
             availableJobs: $availableJobs,
@@ -70,6 +69,7 @@ class HomePageController extends Controller
             'latestJobs',
             'meta',
             'topCountries',
+            'searchCountries',
             'userCountry',
         ]));
     }
