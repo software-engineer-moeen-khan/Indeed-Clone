@@ -96,15 +96,12 @@
                         <livewire:jobs.bookmark-job :jobId="$job->id" />
                         </div>
                         
-                        @if($job->min_salary && $job->max_salary)
+                        @if($job->formatted_salary)
                             <div class="text-right">
                                 <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Salary Range</p>
                                 <p class="text-2xl font-bold text-gray-900 dark:text-white">
-                                    ${{ number_format($job->min_salary/1000) }}k - ${{ number_format($job->max_salary/1000) }}k
+                                    {{ $job->formatted_salary }}
                                 </p>
-                                @if($job->salary_period)
-                                    <p class="text-gray-600 dark:text-gray-400 text-sm">/ {{ $job->salary_period }}</p>
-                                @endif
                             </div>
                         @endif
                     </div>
@@ -142,14 +139,11 @@
                             @endif
 
                             <!-- Mobile Salary Display -->
-                            @if($job->min_salary && $job->max_salary)
+                            @if($job->formatted_salary)
                                 <div class="flex items-center gap-2 lg:hidden">
                                     <span class="text-gray-500 dark:text-gray-400 font-medium">Salary:</span>
                                     <span class="text-gray-900 dark:text-white font-semibold">
-                                        ${{ number_format($job->min_salary/1000) }}k - ${{ number_format($job->max_salary/1000) }}k
-                                        @if($job->salary_period)
-                                            <span class="text-gray-500 dark:text-gray-400">/ {{ $job->salary_period }}</span>
-                                        @endif
+                                        {{ $job->formatted_salary }}
                                     </span>
                                 </div>
                             @endif
@@ -421,13 +415,13 @@
                                         </div>
 
                                         <!-- Salary if available -->
-                                        @if($relatedJob->min_salary && $relatedJob->max_salary)
+                                        @if($relatedJob->formatted_salary)
                                             <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400 text-sm">
                                                 <div class="w-5 h-5 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
-                                                    <i class="las la-dollar-sign text-xs"></i>
+                                                    <i class="las la-money-bill-wave text-xs"></i>
                                                 </div>
                                                 <span class="font-medium text-gray-900 dark:text-white">
-                                                    ${{ number_format($relatedJob->min_salary/1000) }}k - ${{ number_format($relatedJob->max_salary/1000) }}k
+                                                    {{ $relatedJob->formatted_salary }}
                                                 </span>
                                             </div>
                                         @endif
