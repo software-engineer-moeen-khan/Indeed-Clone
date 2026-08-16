@@ -7,6 +7,7 @@ use App\Models\Country;
 use App\Models\JobCategory;
 use App\Models\JobListing;
 use App\Traits\DetectsUserCountry;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Url;
@@ -19,7 +20,6 @@ class JobFilter extends Component
 
     public function mount()
     {
-        // Ensure component is properly initialized
         if (! isset($this->perPage)) {
             $this->perPage = 10;
         }
@@ -33,13 +33,11 @@ class JobFilter extends Component
 
     public function dehydrate()
     {
-        // Ensure state is properly maintained
         $this->dispatch('component-dehydrated');
     }
 
     public function hydrate()
     {
-        // Validate component state on rehydration
         if (! is_array($this->types)) {
             $this->types = [];
         }
@@ -47,6 +45,9 @@ class JobFilter extends Component
 
     #[Url]
     public $search = '';
+
+    #[Url]
+    public $location = '';
 
     #[Url]
     public $source = '';
@@ -88,6 +89,11 @@ class JobFilter extends Component
         $this->resetPage();
     }
 
+    public function updatedLocation()
+    {
+        $this->resetList();
+    }
+
     public function loadMore()
     {
         $this->perPage += 10;
@@ -107,6 +113,7 @@ class JobFilter extends Component
     {
         return collect([
             $this->search,
+            $this->location,
             $this->source,
             $this->exclude_source,
             $this->country,
@@ -148,6 +155,25 @@ class JobFilter extends Component
         }
     }
 
+    protected function applyLocationFilter(Builder $query): Builder
+    {
+        $location = trim((string) $this->location);
+
+        if ($location === '') {
+            return $query;
+        }
+
+        return $query->where(function (Builder $locationQuery) use ($location) {
+            $locationQuery
+                ->where('city', 'like', "%{$location}%")
+                ->orWhere('state', 'like', "%{$location}%");
+
+            if (strlen($location) <= 3) {
+                $locationQuery->orWhere('country', strtoupper($location));
+            }
+        });
+    }
+
     public function updatedSource()
     {
         $this->resetList();
@@ -181,12 +207,14 @@ class JobFilter extends Component
     protected function resetList()
     {
         $this->perPage = 10;
+        $this->resetPage();
     }
 
     public function clearAllFilters()
     {
         $this->reset([
             'search',
+            'location',
             'source',
             'exclude_source',
             'country',
@@ -204,48 +232,49 @@ class JobFilter extends Component
             $perPage = $this->perPage;
 
             if ($this->search) {
-                $searchQuery = JobListing::search($this->search);
-
-                $searchQuery = $searchQuery->when($this->source, fn ($query, $source) => $query->where('publisher', $source))
-                    ->when($this->exclude_source, fn ($query, $exclude_source) => $query->where('publisher', '!=', $exclude_source))
+                $searchQuery = JobListing::search($this->search)
+                    ->when($this->source, fn ($query, $source) => $query->where('publisher', $source))
+                    ->when($this->exclude_source, fn ($query, $excludeSource) => $query->where('publisher', '!=', $excludeSource))
                     ->when($this->country, fn ($query, $country) => $query->where('country', $country))
                     ->when($this->remote, fn ($query) => $query->where('is_remote', true))
                     ->when(! empty($this->types), fn ($query) => $query->whereIn('employment_type', $this->types));
 
-                if ($this->category) {
+                if ($this->category || $this->location) {
                     $jobIds = $searchQuery->keys();
 
-                    $jobs = JobListing::whereIn('id', $jobIds)
-                        ->when($this->category, fn ($query, $category) => $query->whereHas('category', function ($query) use ($category) {
-                            $query->where('id', $category);
-                        }))
+                    $filteredQuery = JobListing::whereIn('id', $jobIds)
+                        ->when($this->category, fn ($query, $category) => $query->whereHas('category', function ($categoryQuery) use ($category) {
+                            $categoryQuery->where('id', $category);
+                        }));
+
+                    $filteredQuery = $this->applyLocationFilter($filteredQuery);
+
+                    $total = (clone $filteredQuery)->count();
+                    $jobs = $filteredQuery
                         ->with('category')
-                        ->latest()
+                        ->latest('posted_at')
                         ->take($perPage)
                         ->get();
-
-                    $total = JobListing::whereIn('id', $jobIds)
-                        ->when($this->category, fn ($query, $category) => $query->whereHas('category', function ($query) use ($category) {
-                            $query->where('id', $category);
-                        }))
-                        ->count();
                 } else {
                     $searchResults = $searchQuery->paginate($perPage);
-                    $jobs = $searchResults->items();
+                    $jobs = collect($searchResults->items())->load('category');
                     $total = $searchResults->total();
                 }
             } else {
                 $baseQuery = JobListing::query()
                     ->when($this->source, fn ($query, $source) => $query->where('publisher', $source))
-                    ->when($this->exclude_source, fn ($query, $exclude_source) => $query->where('publisher', '!=', $exclude_source))
+                    ->when($this->exclude_source, fn ($query, $excludeSource) => $query->where('publisher', '!=', $excludeSource))
                     ->when($this->country, fn ($query, $country) => $query->where('country', $country))
-                    ->when($this->category, fn ($query, $category) => $query->whereHas('category', function ($query) use ($category) {
-                        $query->where('id', $category);
+                    ->when($this->category, fn ($query, $category) => $query->whereHas('category', function ($categoryQuery) use ($category) {
+                        $categoryQuery->where('id', $category);
                     }))
                     ->when($this->remote, fn ($query) => $query->where('is_remote', true))
                     ->when(! empty($this->types), fn ($query) => $query->whereIn('employment_type', $this->types));
 
+                $baseQuery = $this->applyLocationFilter($baseQuery);
+
                 $cacheKey = 'job_filter_count_'.md5(json_encode([
+                    $this->location,
                     $this->source,
                     $this->exclude_source,
                     $this->country,
@@ -255,14 +284,13 @@ class JobFilter extends Component
                 ]));
 
                 $total = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($baseQuery) {
-                    return $baseQuery->count();
+                    return (clone $baseQuery)->count();
                 });
 
-                if (! $this->country) {
+                if (! $this->country && ! $this->location) {
                     $userCountry = $this->getUserCountry();
 
                     if ($userCountry) {
-                        // Prioritize jobs from user's country
                         $countryJobs = (clone $baseQuery)
                             ->where('country', $userCountry)
                             ->latest('posted_at')
@@ -293,7 +321,6 @@ class JobFilter extends Component
                             ->get();
                     }
                 } else {
-                    // User has selected a specific country filter, use normal ordering
                     $jobs = $baseQuery->latest('posted_at')
                         ->with('category')
                         ->take($perPage)
@@ -302,7 +329,6 @@ class JobFilter extends Component
             }
 
             $this->hasMorePages = $total > $perPage;
-
             $this->dispatch('jobCountUpdated', $total);
 
             return view('livewire.job-filter', [
@@ -314,14 +340,13 @@ class JobFilter extends Component
                 'totalJobs' => $total ?? 0,
             ]);
         } catch (\Throwable $e) {
-            \Log::error('JobFilter render error', [
+            Log::error('JobFilter render error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'user_authenticated' => auth()->check(),
                 'memory_usage' => memory_get_usage(true),
             ]);
 
-            // Return basic view with empty results on error
             return view('livewire.job-filter', [
                 'jobs' => collect([]),
                 'categories' => collect([]),
