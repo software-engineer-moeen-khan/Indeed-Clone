@@ -9,13 +9,16 @@ class JobsByCategoryChart extends ChartWidget
 {
     protected static ?string $heading = 'Top Job Categories';
 
-    protected static ?string $description = 'Categories currently attracting the most job listings.';
-
     protected static ?int $sort = 3;
 
     protected int|string|array $columnSpan = 1;
 
     protected static ?string $maxHeight = '320px';
+
+    public function getDescription(): ?string
+    {
+        return 'Categories currently attracting the most job listings.';
+    }
 
     protected function getData(): array
     {
