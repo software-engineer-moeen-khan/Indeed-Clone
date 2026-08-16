@@ -49,6 +49,8 @@
         </div>
     </div>
 
+    <x-advertisement-slot placement="jobs_above_results" />
+
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         <div class="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
             <div>
@@ -62,6 +64,8 @@
 
         <livewire:job-filter wire:key="job-filter-main" />
     </div>
+
+    <x-advertisement-slot placement="jobs_after_results" />
 </section>
 @endsection
 
