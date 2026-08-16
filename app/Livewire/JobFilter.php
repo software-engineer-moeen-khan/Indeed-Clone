@@ -6,10 +6,7 @@ use App\Caches\JobFilterCache;
 use App\Models\Country;
 use App\Models\JobCategory;
 use App\Models\JobListing;
-use App\Traits\DetectsUserCountry;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -17,47 +14,22 @@ use Livewire\WithPagination;
 
 class JobFilter extends Component
 {
-    use DetectsUserCountry, WithPagination;
-
-    public function mount()
-    {
-        if (! isset($this->perPage)) {
-            $this->perPage = 10;
-        }
-        if (! isset($this->hasMorePages)) {
-            $this->hasMorePages = false;
-        }
-        if (! is_array($this->types)) {
-            $this->types = [];
-        }
-    }
-
-    public function dehydrate()
-    {
-        $this->dispatch('component-dehydrated');
-    }
-
-    public function hydrate()
-    {
-        if (! is_array($this->types)) {
-            $this->types = [];
-        }
-    }
+    use WithPagination;
 
     #[Url]
     public $search = '';
 
     #[Url]
-    public $location = '';
+    public $city = '';
+
+    #[Url]
+    public $country = '';
 
     #[Url]
     public $source = '';
 
     #[Url]
     public $exclude_source = '';
-
-    #[Url]
-    public $country = '';
 
     #[Url]
     public $category = '';
@@ -72,55 +44,114 @@ class JobFilter extends Component
 
     public $hasMorePages = false;
 
-    public $sections = [
-        'basic' => true,
-        'source' => false,
-        'location' => false,
-        'jobType' => false,
-    ];
-
     protected $jobTypes = [
         'fulltime' => 'Full Time',
         'contractor' => 'Contractor',
         'parttime' => 'Part Time',
     ];
 
-    public function updatedSearch()
+    public function mount(): void
     {
-        $this->resetPage();
+        if (! is_array($this->types)) {
+            $this->types = array_filter(explode(',', (string) $this->types));
+        }
     }
 
-    public function updatedLocation()
+    public function hydrate(): void
+    {
+        if (! is_array($this->types)) {
+            $this->types = array_filter(explode(',', (string) $this->types));
+        }
+    }
+
+    public function updatedSearch(): void
     {
         $this->resetList();
     }
 
-    public function loadMore()
+    public function updatedCity(): void
+    {
+        $this->resetList();
+    }
+
+    public function updatedCountry(): void
+    {
+        $this->resetList();
+    }
+
+    public function updatedSource(): void
+    {
+        $this->resetList();
+    }
+
+    public function updatedExcludeSource(): void
+    {
+        $this->resetList();
+    }
+
+    public function updatedCategory(): void
+    {
+        $this->resetList();
+    }
+
+    public function updatedRemote(): void
+    {
+        $this->resetList();
+    }
+
+    public function updatedTypes(): void
+    {
+        $this->resetList();
+    }
+
+    public function loadMore(): void
     {
         $this->perPage += 10;
     }
 
-    public function toggleJobType($type)
+    public function toggleJobType(string $type): void
     {
-        if (in_array($type, $this->types)) {
+        if (in_array($type, $this->types, true)) {
             $this->types = array_values(array_diff($this->types, [$type]));
         } else {
             $this->types[] = $type;
         }
+
         $this->resetList();
     }
 
-    public function getActiveFilterCount()
+    public function getActiveFilterCount(): int
     {
         return collect([
             $this->search,
-            $this->location,
+            $this->city,
+            $this->country,
             $this->source,
             $this->exclude_source,
-            $this->country,
             $this->category,
             $this->remote,
-        ])->filter()->count() + count($this->types);
+        ])->filter(fn ($value) => $value !== '' && $value !== null && $value !== false)->count()
+            + count($this->types);
+    }
+
+    public function clearAllFilters(): void
+    {
+        $this->search = '';
+        $this->city = '';
+        $this->country = '';
+        $this->source = '';
+        $this->exclude_source = '';
+        $this->category = '';
+        $this->remote = false;
+        $this->types = [];
+        $this->perPage = 10;
+        $this->resetPage();
+    }
+
+    protected function resetList(): void
+    {
+        $this->perPage = 10;
+        $this->resetPage();
     }
 
     protected function getCategories()
@@ -130,7 +161,7 @@ class JobFilter extends Component
         } catch (\Throwable $e) {
             Log::warning('Failed to get categories from cache', ['error' => $e->getMessage()]);
 
-            return JobCategory::all();
+            return JobCategory::query()->orderBy('name')->get();
         }
     }
 
@@ -141,7 +172,12 @@ class JobFilter extends Component
         } catch (\Throwable $e) {
             Log::warning('Failed to get publishers from cache', ['error' => $e->getMessage()]);
 
-            return JobListing::distinct('publisher')->pluck('publisher')->filter();
+            return JobListing::query()
+                ->whereNotNull('publisher')
+                ->where('publisher', '!=', '')
+                ->distinct()
+                ->orderBy('publisher')
+                ->pluck('publisher');
         }
     }
 
@@ -152,208 +188,113 @@ class JobFilter extends Component
         } catch (\Throwable $e) {
             Log::warning('Failed to get countries from cache', ['error' => $e->getMessage()]);
 
-            return Country::all()->keyBy('code');
+            return Country::query()
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get()
+                ->keyBy('code');
         }
     }
 
-    protected function applyLocationFilter(Builder $query): Builder
+    protected function resolveCountryCode(string $value): string
     {
-        $location = trim((string) $this->location);
+        $value = trim($value);
 
-        if ($location === '') {
-            return $query;
+        if ($value === '') {
+            return '';
         }
 
-        return $query->where(function (Builder $locationQuery) use ($location) {
-            $locationQuery
-                ->where('city', 'like', "%{$location}%")
-                ->orWhere('state', 'like', "%{$location}%");
+        $country = Country::query()
+            ->where('code', strtoupper($value))
+            ->orWhere('name', $value)
+            ->first(['code']);
 
-            if (strlen($location) <= 3) {
-                $locationQuery->orWhere('country', strtoupper($location));
-            }
-        });
+        return $country?->code ?? $value;
     }
 
-    public function updatedSource()
+    protected function buildQuery(): Builder
     {
-        $this->resetList();
-    }
+        $query = JobListing::query()->with('category');
 
-    public function updatedExcludeSource()
-    {
-        $this->resetList();
-    }
+        $search = trim((string) $this->search);
+        if ($search !== '') {
+            $query->where(function (Builder $searchQuery) use ($search) {
+                $searchQuery
+                    ->where('job_title', 'like', "%{$search}%")
+                    ->orWhere('employer_name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('publisher', 'like', "%{$search}%");
+            });
+        }
 
-    public function updatedCountry()
-    {
-        $this->resetList();
-    }
+        $city = trim((string) $this->city);
+        if ($city !== '') {
+            $query->where('city', 'like', "%{$city}%");
+        }
 
-    public function updatedCategory()
-    {
-        $this->resetList();
-    }
+        $country = trim((string) $this->country);
+        if ($country !== '') {
+            $query->where('country', $this->resolveCountryCode($country));
+        }
 
-    public function updatedRemote()
-    {
-        $this->resetList();
-    }
+        if ($this->category !== '') {
+            $query->where('job_category', $this->category);
+        }
 
-    public function updatedTypes()
-    {
-        $this->resetList();
-    }
+        if ($this->remote) {
+            $query->where('is_remote', true);
+        }
 
-    protected function resetList()
-    {
-        $this->perPage = 10;
-        $this->resetPage();
-    }
+        if (! empty($this->types)) {
+            $query->whereIn('employment_type', $this->types);
+        }
 
-    public function clearAllFilters()
-    {
-        $this->reset([
-            'search',
-            'location',
-            'source',
-            'exclude_source',
-            'country',
-            'category',
-            'remote',
-            'types',
-            'perPage',
-        ]);
-        $this->resetPage();
+        if ($this->source !== '') {
+            $query->where('publisher', $this->source);
+        }
+
+        if ($this->exclude_source !== '') {
+            $query->where('publisher', '!=', $this->exclude_source);
+        }
+
+        return $query;
     }
 
     public function render()
     {
         try {
-            $perPage = $this->perPage;
+            $query = $this->buildQuery();
+            $total = (clone $query)->count();
 
-            if ($this->search) {
-                $searchQuery = JobListing::search($this->search)
-                    ->when($this->source, fn ($query, $source) => $query->where('publisher', $source))
-                    ->when($this->exclude_source, fn ($query, $excludeSource) => $query->where('publisher', '!=', $excludeSource))
-                    ->when($this->country, fn ($query, $country) => $query->where('country', $country))
-                    ->when($this->remote, fn ($query) => $query->where('is_remote', true))
-                    ->when(! empty($this->types), fn ($query) => $query->whereIn('employment_type', $this->types));
+            $jobs = $query
+                ->orderByDesc('posted_at')
+                ->orderByDesc('created_at')
+                ->take($this->perPage)
+                ->get();
 
-                if ($this->category || $this->location) {
-                    $jobIds = $searchQuery->keys();
-
-                    $filteredQuery = JobListing::whereIn('id', $jobIds)
-                        ->when($this->category, fn ($query, $category) => $query->whereHas('category', function ($categoryQuery) use ($category) {
-                            $categoryQuery->where('id', $category);
-                        }));
-
-                    $filteredQuery = $this->applyLocationFilter($filteredQuery);
-
-                    $total = (clone $filteredQuery)->count();
-                    $jobs = $filteredQuery
-                        ->with('category')
-                        ->latest('posted_at')
-                        ->take($perPage)
-                        ->get();
-                } else {
-                    $searchResults = $searchQuery->paginate($perPage);
-                    $jobs = EloquentCollection::make($searchResults->items());
-                    $jobs->load('category');
-                    $total = $searchResults->total();
-                }
-            } else {
-                $baseQuery = JobListing::query()
-                    ->when($this->source, fn ($query, $source) => $query->where('publisher', $source))
-                    ->when($this->exclude_source, fn ($query, $excludeSource) => $query->where('publisher', '!=', $excludeSource))
-                    ->when($this->country, fn ($query, $country) => $query->where('country', $country))
-                    ->when($this->category, fn ($query, $category) => $query->whereHas('category', function ($categoryQuery) use ($category) {
-                        $categoryQuery->where('id', $category);
-                    }))
-                    ->when($this->remote, fn ($query) => $query->where('is_remote', true))
-                    ->when(! empty($this->types), fn ($query) => $query->whereIn('employment_type', $this->types));
-
-                $baseQuery = $this->applyLocationFilter($baseQuery);
-
-                $cacheKey = 'job_filter_count_'.md5(json_encode([
-                    $this->location,
-                    $this->source,
-                    $this->exclude_source,
-                    $this->country,
-                    $this->category,
-                    $this->remote,
-                    $this->types,
-                ]));
-
-                $total = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($baseQuery) {
-                    return (clone $baseQuery)->count();
-                });
-
-                if (! $this->country && ! $this->location) {
-                    $userCountry = $this->getUserCountry();
-
-                    if ($userCountry) {
-                        $countryJobs = (clone $baseQuery)
-                            ->where('country', $userCountry)
-                            ->latest('posted_at')
-                            ->with('category')
-                            ->take($perPage)
-                            ->get();
-
-                        $jobs = $countryJobs;
-
-                        if ($jobs->count() < $perPage) {
-                            $needed = $perPage - $jobs->count();
-                            $excludeIds = $jobs->pluck('id')->toArray();
-
-                            $internationalJobs = (clone $baseQuery)
-                                ->where('country', '!=', $userCountry)
-                                ->whereNotIn('id', $excludeIds)
-                                ->latest('posted_at')
-                                ->with('category')
-                                ->take($needed)
-                                ->get();
-
-                            $jobs = $jobs->merge($internationalJobs);
-                        }
-                    } else {
-                        $jobs = $baseQuery->latest('posted_at')
-                            ->with('category')
-                            ->take($perPage)
-                            ->get();
-                    }
-                } else {
-                    $jobs = $baseQuery->latest('posted_at')
-                        ->with('category')
-                        ->take($perPage)
-                        ->get();
-                }
-            }
-
-            $this->hasMorePages = $total > $perPage;
+            $this->hasMorePages = $total > $this->perPage;
             $this->dispatch('jobCountUpdated', $total);
 
             return view('livewire.job-filter', [
-                'jobs' => $jobs ?? collect([]),
-                'categories' => method_exists($this, 'getCategories') ? $this->getCategories() : collect([]),
-                'publishers' => method_exists($this, 'getPublishers') ? $this->getPublishers() : collect([]),
-                'countries' => method_exists($this, 'getCountries') ? $this->getCountries() : collect([]),
-                'jobTypes' => $this->jobTypes ?? [],
-                'totalJobs' => $total ?? 0,
+                'jobs' => $jobs,
+                'categories' => $this->getCategories(),
+                'publishers' => $this->getPublishers(),
+                'countries' => $this->getCountries(),
+                'jobTypes' => $this->jobTypes,
+                'totalJobs' => $total,
             ]);
         } catch (\Throwable $e) {
             Log::error('JobFilter render error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'user_authenticated' => auth()->check(),
-                'memory_usage' => memory_get_usage(true),
             ]);
 
             return view('livewire.job-filter', [
-                'jobs' => collect([]),
-                'categories' => collect([]),
-                'publishers' => collect([]),
-                'countries' => collect([]),
+                'jobs' => collect(),
+                'categories' => collect(),
+                'publishers' => collect(),
+                'countries' => collect(),
                 'jobTypes' => $this->jobTypes,
                 'totalJobs' => 0,
             ]);
