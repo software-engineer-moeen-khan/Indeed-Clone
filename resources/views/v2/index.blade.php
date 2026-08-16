@@ -61,13 +61,16 @@
             </div>
         </form>
 
-        <div class="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
-            <span class="text-[#595959]">Popular searches:</span>
-            <a class="indeed-link" href="{{ route('job.index', ['search' => 'Laravel']) }}">Laravel</a>
-            <a class="indeed-link" href="{{ route('job.index', ['search' => 'Software Engineer']) }}">Software Engineer</a>
-            <a class="indeed-link" href="{{ route('job.index', ['remote' => 1]) }}">Remote</a>
-            <a class="indeed-link" href="{{ route('job.index', ['search' => 'Internship']) }}">Internship</a>
-        </div>
+        @if($popularSearches->isNotEmpty())
+            <div class="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
+                <span class="text-[#595959]">Popular searches:</span>
+                @foreach($popularSearches as $popularSearch)
+                    <a class="indeed-link" href="{{ route('job.index', ['search' => $popularSearch->search_query]) }}">
+                        {{ $popularSearch->label }}
+                    </a>
+                @endforeach
+            </div>
+        @endif
     </div>
 </section>
 
