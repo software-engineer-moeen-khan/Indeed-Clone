@@ -42,9 +42,10 @@ class RecentUsers extends BaseWidget
                         default => 'primary',
                     }),
 
-                IconColumn::make('email_verified_at')
+                IconColumn::make('verified')
                     ->label('Verified')
-                    ->boolean(fn ($state): bool => filled($state)),
+                    ->state(fn (User $record): bool => filled($record->email_verified_at))
+                    ->boolean(),
 
                 TextColumn::make('profile_completion_score')
                     ->label('Profile')
