@@ -9,6 +9,7 @@ use App\Caches\JobsCountCache;
 use App\Caches\CountryAwareMostViewedJobsCache;
 use App\Caches\MostViewedJobsCache;
 use App\Models\JobListing;
+use App\Models\PopularSearch;
 use App\Services\SeoMetaService;
 use App\Traits\DetectsUserCountry;
 use Illuminate\Contracts\View\Factory;
@@ -43,6 +44,13 @@ class HomePageController extends Controller
             ->limit(6)
             ->get();
 
+        $popularSearches = PopularSearch::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->limit(4)
+            ->get();
+
         $jobCategories = JobCategoryCache::getTopCategories();
         $todayAddedJobsCount = JobsCountCache::todayAdded();
         $lastWeekAddedJobsCount = JobsCountCache::lastWeekAdded();
@@ -67,6 +75,7 @@ class HomePageController extends Controller
             'jobCategories',
             'availableJobs',
             'latestJobs',
+            'popularSearches',
             'meta',
             'topCountries',
             'searchCountries',
