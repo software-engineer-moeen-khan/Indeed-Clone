@@ -60,14 +60,6 @@
         </button>
     </form>
 
-    <div class="flex items-center gap-3">
-        <div class="h-px flex-1 bg-[#e4e2e0]"></div>
-        <span class="text-xs font-medium text-[#767676]">OR</span>
-        <div class="h-px flex-1 bg-[#e4e2e0]"></div>
-    </div>
-
-    <x-social-login/>
-
     <p class="text-center text-sm text-[#595959]">
         Already have an account?
         <a href="{{ route('login') }}" class="font-semibold text-[#2557a7] hover:underline">Sign in</a>
