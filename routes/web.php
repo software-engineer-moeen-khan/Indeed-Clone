@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdvertisementController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\CoverLetterController;
 use App\Http\Controllers\HomePageController;
@@ -22,6 +23,7 @@ Route::post('contact', [ContactPageController::class, 'store'])
 Route::get('privacy-policy', \App\Http\Controllers\Pages\PrivacyPolicyPageController::class)->name('privacy-policy');
 Route::get('terms', \App\Http\Controllers\Pages\TermsPageController::class)->name('terms');
 Route::get('job-preferences', [JobPreferencesController::class, 'index'])->name('job.preferences');
+Route::get('advertisements/{advertisement}/open', [AdvertisementController::class, 'show'])->name('advertisement.open');
 
 Route::prefix('jobs')->group(function () {
     Route::get('/', [JobController::class, 'index'])->name('job.index');
