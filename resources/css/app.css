@@ -7,26 +7,39 @@
     color-scheme: light;
     --brand-primary: #2557a7;
     --brand-primary-hover: #164081;
+    --brand-primary-soft: #eef4fb;
     --brand-text: #2d2d2d;
     --brand-muted: #595959;
     --brand-border: #d4d2d0;
+    --brand-border-soft: #e4e2e0;
     --brand-surface: #ffffff;
     --brand-subtle: #f3f2f1;
+    --brand-success: #137333;
 }
 
 @layer base {
     html {
         @apply bg-white;
+        scroll-behavior: smooth;
     }
 
     body {
         @apply bg-white text-gray-900 antialiased;
         color: var(--brand-text);
         background-image: none;
+        font-size: 16px;
+        line-height: 1.5;
     }
 
     a {
         @apply transition-colors duration-150;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+        font: inherit;
     }
 
     ::selection {
@@ -37,7 +50,8 @@
 
 @layer components {
     .btn-primary {
-        @apply inline-flex items-center justify-center rounded-lg px-5 py-2.5 font-semibold text-white transition-colors duration-150;
+        @apply inline-flex items-center justify-center px-5 py-3 font-semibold text-white transition-colors duration-150;
+        border-radius: 8px;
         background: var(--brand-primary);
         box-shadow: none;
     }
@@ -46,20 +60,57 @@
         background: var(--brand-primary-hover);
     }
 
+    .btn-secondary {
+        @apply inline-flex items-center justify-center px-5 py-3 font-semibold transition-colors duration-150;
+        color: var(--brand-primary);
+        border: 1px solid var(--brand-primary);
+        border-radius: 8px;
+        background: #fff;
+    }
+
+    .btn-secondary:hover {
+        background: var(--brand-primary-soft);
+    }
+
     .indeed-card {
-        @apply rounded-xl bg-white;
+        @apply bg-white;
         border: 1px solid var(--brand-border);
+        border-radius: 12px;
         box-shadow: 0 1px 2px rgba(45, 45, 45, 0.06);
     }
 
+    .indeed-card:hover {
+        border-color: #9f9f9f;
+        box-shadow: 0 2px 8px rgba(45, 45, 45, 0.08);
+    }
+
     .indeed-input {
-        @apply w-full rounded-lg bg-white px-4 py-3 text-gray-900 outline-none transition duration-150;
+        @apply w-full bg-white px-4 py-3 text-gray-900 outline-none transition duration-150;
+        min-height: 52px;
         border: 1px solid #949494;
+        border-radius: 8px;
     }
 
     .indeed-input:focus {
         border-color: var(--brand-primary);
-        box-shadow: 0 0 0 1px var(--brand-primary);
+        box-shadow: inset 0 0 0 1px var(--brand-primary), 0 0 0 1px var(--brand-primary);
+    }
+
+    .indeed-chip {
+        @apply inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium;
+        color: var(--brand-text);
+        background: var(--brand-subtle);
+        border-radius: 6px;
+    }
+
+    .indeed-link {
+        color: var(--brand-primary);
+        font-weight: 600;
+    }
+
+    .indeed-link:hover {
+        color: var(--brand-primary-hover);
+        text-decoration: underline;
     }
 
     .tech-border {
@@ -68,24 +119,26 @@
 }
 
 .font-oxanium,
-.font-oxanium-bold {
-    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+.font-oxanium-bold,
+.font-oxanium-semibold {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
 }
 
-.font-oxanium-bold {
+.font-oxanium-bold,
+.font-oxanium-semibold {
     font-weight: 700;
 }
 
 .job-card,
 .glass-effect {
-    background: #ffffff;
-    border-color: var(--brand-border);
-    backdrop-filter: none;
+    background: #ffffff !important;
+    border-color: var(--brand-border) !important;
+    backdrop-filter: none !important;
 }
 
 .job-card {
-    border-radius: 0.75rem;
-    box-shadow: 0 1px 2px rgba(45, 45, 45, 0.06);
+    border-radius: 12px !important;
+    box-shadow: 0 1px 2px rgba(45, 45, 45, 0.06) !important;
 }
 
 html.light body {
@@ -93,54 +146,283 @@ html.light body {
     color: var(--brand-text);
 }
 
-/* Homepage job search: clean bordered search experience inspired by modern job boards. */
-#searchForm {
-    max-width: 880px;
-    margin-left: auto;
-    margin-right: auto;
+/* Header / navigation */
+.public-nav {
+    background: #fff;
+    border-bottom: 1px solid var(--brand-border-soft);
 }
 
-#searchInput {
-    min-height: 60px;
-    border: 1px solid #949494 !important;
-    border-radius: 10px !important;
-    background: #ffffff !important;
+.public-nav-inner {
+    max-width: 1180px;
+    min-height: 64px;
+    margin: 0 auto;
+}
+
+/* Homepage */
+.indeed-home-hero {
+    background: #fff;
+    border-bottom: 1px solid var(--brand-border-soft);
+}
+
+.indeed-search-shell {
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+.indeed-search-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, .85fr) auto;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.indeed-search-field {
+    position: relative;
+}
+
+.indeed-search-field label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--brand-text);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.indeed-search-field i {
+    position: absolute;
+    left: 15px;
+    bottom: 16px;
+    color: #595959;
+    font-size: 20px;
+    pointer-events: none;
+}
+
+.indeed-search-field .indeed-input {
+    padding-left: 44px;
+}
+
+.indeed-search-button-wrap {
+    display: flex;
+    align-items: flex-end;
+}
+
+.indeed-search-button-wrap .btn-primary {
+    min-height: 52px;
+    white-space: nowrap;
+}
+
+.home-job-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.home-category-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.home-category-card {
+    display: block;
+    min-height: 118px;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid var(--brand-border);
+    border-radius: 12px;
+}
+
+.home-category-card:hover {
+    border-color: var(--brand-primary);
+    box-shadow: 0 2px 8px rgba(45,45,45,.08);
+}
+
+/* Job card */
+.indeed-job-card {
+    position: relative;
+    padding: 20px 22px;
+    background: #fff;
+    border: 1px solid var(--brand-border);
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(45, 45, 45, 0.04);
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.indeed-job-card:hover {
+    border-color: #9b9b9b;
+    box-shadow: 0 2px 8px rgba(45,45,45,.08);
+}
+
+.indeed-job-card-title {
+    color: var(--brand-primary);
+    font-size: 18px;
+    line-height: 1.35;
+    font-weight: 700;
+}
+
+.indeed-job-card-title:hover {
+    color: var(--brand-primary-hover);
+    text-decoration: underline;
+}
+
+.indeed-job-card-company {
+    margin-top: 5px;
+    color: var(--brand-text);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.indeed-job-card-location {
+    margin-top: 2px;
+    color: var(--brand-muted);
+    font-size: 14px;
+}
+
+.indeed-job-card-description {
+    margin-top: 12px;
+    color: var(--brand-muted);
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.indeed-job-card-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    color: #767676;
+    font-size: 12px;
+}
+
+/* Search results / Livewire filter */
+.job-results-page {
+    min-height: 70vh;
+    background: #fff;
+}
+
+.job-results-page input[type="text"],
+.job-results-page select {
+    background: #fff !important;
     color: var(--brand-text) !important;
-    box-shadow: 0 1px 2px rgba(45, 45, 45, 0.08) !important;
-}
-
-#searchInput:focus {
-    border-color: var(--brand-primary) !important;
-    box-shadow: 0 0 0 1px var(--brand-primary) !important;
-}
-
-#searchForm button[type="submit"] {
-    background-image: none !important;
-    background-color: var(--brand-primary) !important;
+    border-color: #949494 !important;
     border-radius: 8px !important;
     box-shadow: none !important;
 }
 
-#searchForm button[type="submit"]:hover {
-    background-color: var(--brand-primary-hover) !important;
-    transform: none !important;
+.job-results-page input[type="text"]:focus,
+.job-results-page select:focus {
+    border-color: var(--brand-primary) !important;
+    box-shadow: inset 0 0 0 1px var(--brand-primary) !important;
 }
 
-#autocompleteDropdown {
-    background: #ffffff !important;
-    border: 1px solid var(--brand-border) !important;
-    border-radius: 10px !important;
-    box-shadow: 0 8px 24px rgba(45, 45, 45, 0.12) !important;
+.job-results-page .rounded-2xl {
+    border-radius: 12px !important;
 }
 
-@media (max-width: 640px) {
-    #searchInput {
-        padding-right: 4rem !important;
+.job-results-page [class*="bg-gray-100"] {
+    background: var(--brand-subtle) !important;
+}
+
+.job-results-page button[class*="bg-blue-500"],
+.job-results-page button[class*="bg-blue-600"] {
+    background: var(--brand-primary) !important;
+}
+
+.job-results-page button[class*="bg-blue-500"]:hover,
+.job-results-page button[class*="bg-blue-600"]:hover {
+    background: var(--brand-primary-hover) !important;
+}
+
+.job-results-page .lg\:col-span-1 {
+    border-radius: 12px !important;
+}
+
+/* Job detail — flatten decorative styling into a content-first layout */
+.job-detail-page {
+    background: #fff;
+}
+
+.job-detail-page .bg-gradient-to-br,
+.job-detail-page [class*="bg-gradient-to"] {
+    background-image: none !important;
+    background-color: #fff !important;
+}
+
+.job-detail-page [class*="rounded-3xl"] {
+    border-radius: 12px !important;
+}
+
+.job-detail-page [class*="rounded-2xl"] {
+    border-radius: 12px !important;
+}
+
+.job-detail-page [class*="shadow-lg"],
+.job-detail-page [class*="shadow-sm"] {
+    box-shadow: 0 1px 3px rgba(45,45,45,.08) !important;
+}
+
+.job-detail-page h1,
+.job-detail-page h2,
+.job-detail-page h3 {
+    color: var(--brand-text) !important;
+    letter-spacing: -0.01em;
+}
+
+.job-detail-page h1 {
+    font-size: clamp(2rem, 4vw, 2.75rem) !important;
+    line-height: 1.15 !important;
+}
+
+.job-detail-page .prose {
+    color: #3f3f3f !important;
+}
+
+.job-detail-page a[class*="bg-blue"],
+.job-detail-page button[class*="bg-blue"] {
+    background: var(--brand-primary) !important;
+}
+
+/* Auth */
+.auth-shell {
+    background: #f7f7f7;
+}
+
+/* Footer */
+.public-footer {
+    background: #fff;
+    border-top: 1px solid var(--brand-border-soft);
+}
+
+/* Preserve external media embeds */
+#map {
+    min-height: 280px;
+}
+
+@media (max-width: 1024px) {
+    .home-category-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .indeed-search-grid {
+        grid-template-columns: 1fr;
     }
 
-    #searchForm button[type="submit"] {
-        min-width: 48px;
-        padding-left: 0.9rem !important;
-        padding-right: 0.9rem !important;
+    .indeed-search-button-wrap .btn-primary {
+        width: 100%;
+    }
+
+    .home-job-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .home-category-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .indeed-job-card {
+        padding: 18px;
     }
 }
