@@ -8,13 +8,17 @@ use App\Http\Controllers\JobController;
 use App\Http\Controllers\JobPreferencesController;
 use App\Http\Controllers\MetricsController;
 use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\Pages\ContactPageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SocialAuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomePageController::class)->name('home');
 Route::get('about', \App\Http\Controllers\Pages\AboutPageController::class)->name('about');
-Route::get('contact', \App\Http\Controllers\Pages\ContactPageController::class)->name('contact');
+Route::get('contact', ContactPageController::class)->name('contact');
+Route::post('contact', [ContactPageController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('contact.store');
 Route::get('privacy-policy', \App\Http\Controllers\Pages\PrivacyPolicyPageController::class)->name('privacy-policy');
 Route::get('terms', \App\Http\Controllers\Pages\TermsPageController::class)->name('terms');
 Route::get('job-preferences', [JobPreferencesController::class, 'index'])->name('job.preferences');
