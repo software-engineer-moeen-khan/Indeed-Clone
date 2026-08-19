@@ -15,6 +15,10 @@ log() {
     printf '\n\033[1;34m[deploy]\033[0m %s\n' "$*"
 }
 
+warn() {
+    printf '\n\033[1;33m[deploy:warning]\033[0m %s\n' "$*" >&2
+}
+
 fail() {
     printf '\n\033[1;31m[deploy:error]\033[0m %s\n' "$*" >&2
     exit 1
@@ -139,13 +143,56 @@ set_env SESSION_DRIVER database
 set_env CACHE_STORE database
 set_env QUEUE_CONNECTION database
 
+log "Preparing Laravel writable directories"
+mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache
+chmod -R ug+rwX storage bootstrap/cache || true
+
+# Hostinger shared hosting disables proc_open on CLI PHP. Composer itself can
+# install packages, but Composer script commands such as `@php artisan ...`
+# cannot be spawned. Install without scripts and run Laravel's post-install
+# commands directly from this Bash process instead.
+if php -r 'exit(function_exists("proc_open") ? 0 : 1);'; then
+    log "proc_open is available; using Hostinger-safe Composer mode anyway"
+else
+    warn "proc_open is disabled by Hostinger; Composer child scripts will be run directly by Bash"
+fi
+
 log "Installing PHP dependencies"
 COMPOSER_MEMORY_LIMIT=-1 composer install \
     --no-dev \
     --prefer-dist \
     --optimize-autoloader \
     --no-interaction \
-    --no-progress
+    --no-progress \
+    --no-scripts
+
+# Equivalent to Laravel's ComposerScripts::postAutoloadDump cleanup. This avoids
+# stale package/service/config manifests when Composer scripts are disabled.
+rm -f \
+    bootstrap/cache/config.php \
+    bootstrap/cache/packages.php \
+    bootstrap/cache/services.php
+
+log "Running Laravel package discovery directly"
+if ! php artisan package:discover --ansi --no-interaction; then
+    warn "artisan package:discover failed; rebuilding Laravel package manifest directly"
+    php -r '
+        require __DIR__."/vendor/autoload.php";
+        $files = new Illuminate\Filesystem\Filesystem();
+        $manifest = new Illuminate\Foundation\PackageManifest(
+            $files,
+            __DIR__,
+            __DIR__."/bootstrap/cache/packages.php"
+        );
+        $manifest->build();
+    '
+fi
+
+# These are the remaining project post-autoload Composer hooks. Run them from
+# Bash instead of Composer so they do not require proc_open.
+log "Refreshing Filament and Livewire assets"
+php artisan filament:upgrade --no-interaction || warn "Filament asset refresh was skipped; continuing deployment"
+php artisan vendor:publish --force --tag=livewire:assets --ansi --no-interaction || warn "Livewire asset publish was skipped; continuing deployment"
 
 if [[ "$FRESH_ENV" -eq 1 ]] || ! grep -Eq '^APP_KEY=base64:.+' .env; then
     log "Generating Laravel application key"
@@ -163,10 +210,6 @@ if command -v npm >/dev/null 2>&1; then
 else
     fail "npm is required because public/build is not committed. Enable Node.js/npm for this Hostinger account and run the same command again."
 fi
-
-log "Preparing Laravel storage and cache directories"
-mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache
-chmod -R ug+rwX storage bootstrap/cache || true
 
 log "Running database migrations"
 php artisan migrate --force --no-interaction
