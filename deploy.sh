@@ -55,7 +55,6 @@ if [[ -d .git ]]; then
     git checkout -f "$BRANCH"
     git reset --hard "origin/$BRANCH"
 else
-    # A fresh Hostinger site commonly contains only default.php and/or .well-known.
     unexpected="$(find . -mindepth 1 -maxdepth 1 \
         ! -name 'default.php' \
         ! -name '.well-known' \
@@ -71,7 +70,6 @@ else
     cleanup_tmp="$(mktemp -d)"
     git clone --depth 1 --branch "$BRANCH" "$REPO_URL" "$cleanup_tmp/repo"
 
-    # Preserve a pre-existing server .env if there is one.
     preserved_env=""
     if [[ -f .env ]]; then
         preserved_env="$cleanup_tmp/server.env"
@@ -91,7 +89,6 @@ if [[ ! -f .env ]]; then
     FRESH_ENV=1
 fi
 
-# Safely replace a dotenv key while keeping secrets out of Git history.
 set_env() {
     local key="$1"
     local value="$2"
@@ -113,8 +110,6 @@ set_env() {
     ' "$key" "$value"
 }
 
-# Derive the Hostinger domain from /home/USER/domains/DOMAIN/public_html when
-# APP_URL was not explicitly supplied to the command.
 if [[ -n "${APP_URL:-}" ]]; then
     RESOLVED_APP_URL="$APP_URL"
 else
@@ -137,8 +132,6 @@ set_env DB_PORT "$DB_PORT"
 set_env DB_DATABASE "$DB_DATABASE"
 set_env DB_USERNAME "$DB_USERNAME"
 set_env DB_PASSWORD "$DB_PASSWORD"
-
-# Keep the app usable on ordinary shared hosting without requiring Redis.
 set_env SESSION_DRIVER database
 set_env CACHE_STORE database
 set_env QUEUE_CONNECTION database
@@ -147,12 +140,8 @@ log "Preparing Laravel writable directories"
 mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache
 chmod -R ug+rwX storage bootstrap/cache || true
 
-# Hostinger shared hosting disables proc_open on CLI PHP. Composer itself can
-# install packages, but Composer script commands such as `@php artisan ...`
-# cannot be spawned. Install without scripts and run Laravel's post-install
-# commands directly from this Bash process instead.
 if php -r 'exit(function_exists("proc_open") ? 0 : 1);'; then
-    log "proc_open is available; using Hostinger-safe Composer mode anyway"
+    log "proc_open is available; using Hostinger-safe Composer mode"
 else
     warn "proc_open is disabled by Hostinger; Composer child scripts will be run directly by Bash"
 fi
@@ -166,8 +155,6 @@ COMPOSER_MEMORY_LIMIT=-1 composer install \
     --no-progress \
     --no-scripts
 
-# Equivalent to Laravel's ComposerScripts::postAutoloadDump cleanup. This avoids
-# stale package/service/config manifests when Composer scripts are disabled.
 rm -f \
     bootstrap/cache/config.php \
     bootstrap/cache/packages.php \
@@ -188,8 +175,6 @@ if ! php artisan package:discover --ansi --no-interaction; then
     '
 fi
 
-# These are the remaining project post-autoload Composer hooks. Run them from
-# Bash instead of Composer so they do not require proc_open.
 log "Refreshing Filament and Livewire assets"
 php artisan filament:upgrade --no-interaction || warn "Filament asset refresh was skipped; continuing deployment"
 php artisan vendor:publish --force --tag=livewire:assets --ansi --no-interaction || warn "Livewire asset publish was skipped; continuing deployment"
@@ -200,15 +185,17 @@ if [[ "$FRESH_ENV" -eq 1 ]] || ! grep -Eq '^APP_KEY=base64:.+' .env; then
 fi
 
 if command -v npm >/dev/null 2>&1; then
-    log "Installing and building frontend assets"
+    log "npm is available; rebuilding frontend assets"
     if [[ -f package-lock.json ]]; then
         npm ci --no-audit --no-fund
     else
         npm install --no-audit --no-fund
     fi
     npm run build
+elif [[ -f public/build/manifest.json ]]; then
+    log "npm is unavailable; using prebuilt Vite assets committed in public/build"
 else
-    fail "npm is required because public/build is not committed. Enable Node.js/npm for this Hostinger account and run the same command again."
+    fail "npm is unavailable and public/build/manifest.json is missing. Production frontend assets are required."
 fi
 
 log "Running database migrations"
@@ -221,9 +208,6 @@ log "Refreshing production caches"
 php artisan optimize:clear
 php artisan config:cache
 php artisan view:cache
-
-# Route cache is useful in production, but some applications intentionally use
-# closure routes. Do not fail deployment if those routes cannot be cached.
 php artisan route:cache >/dev/null 2>&1 || true
 
 log "Deployment complete"
