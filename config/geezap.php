@@ -1,6 +1,14 @@
 <?php
 
 return [
+    \App\Enums\JobCategory::BiomedicalEngineering->value => [
+        'query' => 'Biomedical Engineer',
+        'num_pages' => 3,
+        'date_posted' => 'month',
+        'page' => 2,
+        'category_image' => 'assets/images/categories/biomedical.svg',
+    ],
+
     \App\Enums\JobCategory::Laravel->value => [
         'query' => 'Laravel',
         'num_pages' => 20,
