@@ -107,7 +107,7 @@ class ImportLiveJobs extends Command
             foreach ($this->feedCache[$source] ?? [] as $job) {
                 $normalized = $this->normalizeJob($source, $job);
 
-                if ($normalized === null || ! $this->matchesCategory($category, $normalized, $queries)) {
+                if ($normalized === null || ! $this->matchesCategory($category, $normalized)) {
                     continue;
                 }
 
@@ -121,7 +121,7 @@ class ImportLiveJobs extends Command
                     foreach ($this->fetchHimalayas($query, $category->slug === self::BIOMEDICAL_SLUG ? 2 : 1) as $job) {
                         $normalized = $this->normalizeJob('himalayas', $job);
 
-                        if ($normalized === null || ! $this->matchesCategory($category, $normalized, $queries)) {
+                        if ($normalized === null || ! $this->matchesCategory($category, $normalized)) {
                             continue;
                         }
 
@@ -417,6 +417,9 @@ class ImportLiveJobs extends Command
         mixed $maxSalary = null,
         string $salaryCurrency = ''
     ): array {
+        $cleanDescription = $this->cleanDescription($description);
+        $cleanDescription = trim($cleanDescription."\n\nSource: {$publisher}");
+
         return [
             'employer_name' => Str::limit(trim($company), 250, ''),
             'employer_logo' => $this->validHttpUrl($employerLogo) ? $employerLogo : null,
@@ -426,7 +429,7 @@ class ImportLiveJobs extends Command
             'employment_type' => Str::limit($this->humanizeEmploymentType($employmentType), 250, ''),
             'job_title' => Str::limit(trim($title), 250, ''),
             'apply_link' => trim($applyLink),
-            'description' => $this->cleanDescription($description),
+            'description' => Str::limit($cleanDescription, 60000, ''),
             'is_remote' => $remote,
             'city' => $city ? Str::limit(trim($city), 250, '') : null,
             'state' => $state ? Str::limit(trim($state), 250, '') : null,
@@ -471,28 +474,33 @@ class ImportLiveJobs extends Command
         return array_values(array_unique(array_filter($queries)));
     }
 
-    private function matchesCategory(JobCategory $category, array $job, array $queries): bool
+    private function matchesCategory(JobCategory $category, array $job): bool
     {
         $haystack = Str::lower(($job['job_title'] ?? '').' '.($job['description'] ?? ''));
+        $slug = Str::lower($category->slug);
 
-        if ($category->slug === self::BIOMEDICAL_SLUG) {
-            foreach (['biomedical', 'medical device', 'clinical engineer', 'biomechanical', 'bioengineer', 'bio-engineer', 'medical equipment'] as $needle) {
-                if (str_contains($haystack, $needle)) {
-                    return true;
-                }
-            }
+        $keywords = match ($slug) {
+            self::BIOMEDICAL_SLUG => ['biomedical', 'medical device', 'clinical engineer', 'biomechanical', 'bioengineer', 'bio-engineer', 'medical equipment'],
+            'laravel' => ['laravel'],
+            'symfony' => ['symfony'],
+            'wordpress' => ['wordpress'],
+            'vuejs' => ['vue.js', 'vuejs', 'vue 2', 'vue 3'],
+            'react' => ['react.js', 'reactjs', 'react developer', 'react engineer'],
+            'angular' => ['angular'],
+            'django' => ['django'],
+            'flask' => ['flask'],
+            'express' => ['express.js', 'expressjs', 'node express'],
+            'spring' => ['spring boot', 'spring framework', 'java spring'],
+            'ruby-on-rails' => ['ruby on rails', 'rails developer', 'rails engineer'],
+            'nodejs' => ['node.js', 'nodejs', 'node developer', 'node engineer'],
+            'python' => ['python'],
+            'aspnet' => ['asp.net', '.net developer', '.net engineer', 'dotnet'],
+            default => [Str::lower(trim((string) $category->query_name))],
+        };
 
-            return false;
-        }
-
-        foreach ($queries as $query) {
-            $tokens = preg_split('/[\s.#+\-\/]+/', Str::lower($query), -1, PREG_SPLIT_NO_EMPTY) ?: [];
-            $tokens = array_values(array_filter($tokens, static fn (string $token): bool => strlen($token) >= 3));
-
-            foreach ($tokens as $token) {
-                if (str_contains($haystack, $token)) {
-                    return true;
-                }
+        foreach (array_filter($keywords) as $keyword) {
+            if (str_contains($haystack, $keyword)) {
+                return true;
             }
         }
 
@@ -593,7 +601,7 @@ class ImportLiveJobs extends Command
         $plain = preg_replace('/[ \t]+/', ' ', $plain) ?? $plain;
         $plain = preg_replace('/\R{3,}/', "\n\n", $plain) ?? $plain;
 
-        return Str::limit(trim($plain), 60000, '');
+        return Str::limit(trim($plain), 59800, '');
     }
 
     private function parseDate(mixed $value): Carbon
