@@ -25,8 +25,19 @@ class JobListingObserver
 {
     public function creating(JobListing $jobListing): void
     {
-        $jobListing->uuid = Str::uuid();
-        $jobListing->slug = Str::slug($jobListing->job_title.'-'.time());
+        // time() can generate the same slug when multiple jobs with the same
+        // title are imported within one second. Build the slug from the UUID so
+        // every imported/admin-created job gets a collision-safe URL slug.
+        $uuid = (string) Str::uuid();
+        $slugUuid = Str::lower(str_replace('-', '', $uuid));
+        $slugBase = Str::limit(Str::slug((string) $jobListing->job_title), 200, '');
+
+        if ($slugBase === '') {
+            $slugBase = 'job';
+        }
+
+        $jobListing->uuid = $uuid;
+        $jobListing->slug = $slugBase.'-'.$slugUuid;
     }
 
     public function updating(JobListing $jobListing): void {}
