@@ -61,11 +61,17 @@ class JobCategoryResource extends Resource
                     ->schema([
                         Forms\Components\Select::make('countries')
                             ->multiple()
-                            ->relationship('countries', 'name')
+                            ->relationship(
+                                name: 'countries',
+                                titleAttribute: 'name',
+                                modifyQueryUsing: fn (Builder $query) => $query
+                                    ->where('is_active', true)
+                                    ->orderBy('name')
+                            )
                             ->preload()
                             ->searchable()
-                            ->required()
-                            ->helperText('Select countries for this job category')
+                            ->placeholder('All countries / no specific country')
+                            ->helperText('Optional. Select one or more countries, or leave empty for all countries.'),
                     ]),
 
                 Forms\Components\FileUpload::make('category_image')
