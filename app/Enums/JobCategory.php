@@ -4,6 +4,7 @@ namespace App\Enums;
 
 enum JobCategory :string
 {
+    case BiomedicalEngineering = 'biomedical-engineering';
     case Laravel = 'laravel';
     case Symfony = 'symfony';
     case Wordpress = 'wordpress';
@@ -43,6 +44,4 @@ enum JobCategory :string
     case Elasticsearch = 'elasticsearch';
     case Kafka = 'kafka';
     case RabbitMQ = 'rabbitmq';
-
-
 }
