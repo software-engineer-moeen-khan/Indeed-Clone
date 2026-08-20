@@ -135,6 +135,7 @@ set_env DB_PASSWORD "$DB_PASSWORD"
 set_env SESSION_DRIVER database
 set_env CACHE_STORE database
 set_env QUEUE_CONNECTION database
+set_env SCOUT_DRIVER database
 
 log "Preparing Laravel writable directories"
 mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache
