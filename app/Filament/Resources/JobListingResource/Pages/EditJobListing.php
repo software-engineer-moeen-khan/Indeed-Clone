@@ -30,32 +30,46 @@ class EditJobListing extends EditRecord
     protected function getFormActions(): array
     {
         return [
-            Actions\CreateAction::make()
-                ->icon('heroicon-o-arrow-path')
+            $this->getSaveFormAction()
+                ->icon('heroicon-o-check-circle')
                 ->label('Update Job Info'),
-            Actions\Action::make('cancel')
-                ->label('Cancel')
+            $this->getCancelFormAction()
                 ->icon('heroicon-o-x-circle')
-                ->color('danger')
-                ->url(route('filament.geezap.resources.job-listings.index')),
+                ->color('gray'),
         ];
     }
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $data['benefits'] = array_map('trim', explode(';', $data['benefits']));
-        $data['qualifications'] = array_map('trim', explode(';', $data['qualifications']));
-        $data['responsibilities'] = array_map('trim', explode(';', $data['responsibilities']));
+        foreach (['benefits', 'qualifications', 'responsibilities', 'skills'] as $field) {
+            $data[$field] = $this->normalizeTags($data[$field] ?? []);
+        }
 
         return $data;
     }
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        $data['benefits'] = implode(';', $data['benefits'] ?? []);
-        $data['qualifications'] = implode(';', $data['qualifications'] ?? []);
-        $data['responsibilities'] = implode(';', $data['responsibilities'] ?? []);
+        foreach (['benefits', 'qualifications', 'responsibilities', 'skills'] as $field) {
+            $data[$field] = $this->normalizeTags($data[$field] ?? []);
+        }
 
         return $data;
+    }
+
+    private function normalizeTags(mixed $value): array
+    {
+        if (is_string($value)) {
+            $value = preg_split('/[;\r\n]+/', $value) ?: [];
+        }
+
+        if (! is_array($value)) {
+            return [];
+        }
+
+        return array_values(array_unique(array_filter(
+            array_map(static fn ($item): string => trim((string) $item), $value),
+            static fn (string $item): bool => $item !== ''
+        )));
     }
 }
