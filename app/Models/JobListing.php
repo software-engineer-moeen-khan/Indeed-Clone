@@ -54,6 +54,7 @@ class JobListing extends Model
         'benefits',
         'qualifications',
         'responsibilities',
+        'skills',
         'required_experience',
     ];
 
@@ -73,14 +74,6 @@ class JobListing extends Model
         ];
     }
 
-    /**
-     * NJP pages occasionally arrive as the entire rendered page when the source
-     * does not expose a clean structured description. Keep only the real job
-     * description and never expose NJP navigation/footer/JavaScript text.
-     *
-     * The setter protects future imports; the getter protects any legacy rows
-     * until the repair command has rewritten them in the database.
-     */
     protected function description(): Attribute
     {
         return Attribute::make(
@@ -110,12 +103,6 @@ class JobListing extends Model
         $value = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $value = str_replace("\u{00A0}", ' ', $value);
 
-        /*
-         * NJP's page contains several occurrences of the words "Job Description",
-         * including JavaScript comments near the footer. The actual heading is the
-         * LAST occurrence before "Eligibility Criteria". Selecting the first one
-         * was the reason some legacy rows still displayed the toggle script.
-         */
         $eligibilityPos = stripos($value, 'Eligibility Criteria');
         $startPos = false;
 
@@ -173,7 +160,6 @@ class JobListing extends Model
             }
         }
 
-        // Final safety net: nothing from these NJP page scripts may reach users.
         foreach ([
             'Toggle Job Description Read More / Less',
             'isDescriptionExpanded',
@@ -216,7 +202,6 @@ class JobListing extends Model
         return $this->hasMany(JobApplyOption::class);
     }
 
-    // Accessor to provide apply_options as an array (for backward compatibility with tests)
     public function getApplyOptionsAttribute(): array
     {
         return $this->applyOptions()->orderBy('publisher', 'desc')->get()->map(function ($option) {
@@ -228,11 +213,6 @@ class JobListing extends Model
         })->toArray();
     }
 
-    /**
-     * Return one consistent salary string for every frontend location.
-     * The currency is taken directly from salary_currency, so the value
-     * entered in the admin panel is the value shown to job seekers.
-     */
     public function getFormattedSalaryAttribute(): ?string
     {
         $hasMin = $this->min_salary !== null && $this->min_salary !== '';
@@ -253,8 +233,6 @@ class JobListing extends Model
                 return $amount;
             }
 
-            // Currency symbols read naturally without a space ($1,000),
-            // while currency codes read naturally with one (PKR 1,000).
             $isSymbol = preg_match('/^[^\p{L}\p{N}]+$/u', $currency) === 1;
 
             return $isSymbol
@@ -286,11 +264,9 @@ class JobListing extends Model
     {
         $array = $this->toArray();
 
-        // Convert datetime fields to timestamps for Typesense compatibility
         if (isset($array['posted_at']) && $array['posted_at']) {
             $array['posted_at'] = $this->posted_at->timestamp;
         } else {
-            // Use created_at as fallback for null posted_at
             $array['posted_at'] = $this->created_at->timestamp;
         }
 
