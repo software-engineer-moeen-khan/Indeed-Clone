@@ -74,12 +74,12 @@ class JobListing extends Model
     }
 
     /**
-     * NJP pages can contain the entire rendered page when a structured
-     * description is unavailable. Keep only the real Job Description section
-     * and never expose footer/JavaScript text to job seekers.
+     * NJP pages occasionally arrive as the entire rendered page when the source
+     * does not expose a clean structured description. Keep only the real job
+     * description and never expose NJP navigation/footer/JavaScript text.
      *
-     * The setter cleans future imports, while the getter also fixes already
-     * imported rows immediately without requiring a destructive data migration.
+     * The setter protects future imports; the getter protects any legacy rows
+     * until the repair command has rewritten them in the database.
      */
     protected function description(): Attribute
     {
@@ -95,30 +95,103 @@ class JobListing extends Model
             return $value;
         }
 
-        $hasNpjPageArtifacts =
+        $isNjp =
+            str_contains((string) $this->publisher, 'National Jobs Portal') ||
+            stripos($value, 'Source: National Jobs Portal (NJP)') !== false ||
             stripos($value, 'Toggle Job Description Read More / Less') !== false ||
             stripos($value, 'isDescriptionExpanded') !== false ||
-            stripos($value, 'toggle-description-btn') !== false;
+            stripos($value, 'toggle-description-btn') !== false ||
+            stripos($value, "info@njp.gov.pk") !== false;
 
-        if (! $hasNpjPageArtifacts) {
+        if (! $isNjp) {
             return $value;
         }
 
-        $start = stripos($value, 'Job Description');
+        $value = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $value = str_replace("\u{00A0}", ' ', $value);
 
-        if ($start !== false) {
-            $start += strlen('Job Description');
-            $end = stripos($value, 'Eligibility Criteria', $start);
+        /*
+         * NJP's page contains several occurrences of the words "Job Description",
+         * including JavaScript comments near the footer. The actual heading is the
+         * LAST occurrence before "Eligibility Criteria". Selecting the first one
+         * was the reason some legacy rows still displayed the toggle script.
+         */
+        $eligibilityPos = stripos($value, 'Eligibility Criteria');
+        $startPos = false;
 
-            if ($end !== false && $end > $start) {
-                $value = substr($value, $start, $end - $start);
+        if ($eligibilityPos !== false) {
+            $beforeEligibility = substr($value, 0, $eligibilityPos);
+            $startPos = strripos($beforeEligibility, 'Job Description');
+        }
+
+        if ($startPos === false) {
+            $cutoffCandidates = [];
+
+            foreach ([
+                'Toggle Job Description Read More / Less',
+                'Quick Overview',
+                'About Employer',
+                'Source: National Jobs Portal (NJP)',
+            ] as $marker) {
+                $position = stripos($value, $marker);
+
+                if ($position !== false) {
+                    $cutoffCandidates[] = $position;
+                }
+            }
+
+            $searchArea = $cutoffCandidates !== []
+                ? substr($value, 0, min($cutoffCandidates))
+                : $value;
+
+            $startPos = strripos($searchArea, 'Job Description');
+        }
+
+        if ($startPos !== false) {
+            $contentStart = $startPos + strlen('Job Description');
+            $endCandidates = [];
+
+            foreach ([
+                'Eligibility Criteria',
+                'Quick Overview',
+                'About Employer',
+                'Toggle Job Description Read More / Less',
+                'Source: National Jobs Portal (NJP)',
+            ] as $marker) {
+                $position = stripos($value, $marker, $contentStart);
+
+                if ($position !== false && $position > $contentStart) {
+                    $endCandidates[] = $position;
+                }
+            }
+
+            $contentEnd = $endCandidates !== [] ? min($endCandidates) : strlen($value);
+            $candidate = trim(substr($value, $contentStart, $contentEnd - $contentStart));
+
+            if (mb_strlen($candidate) >= 20) {
+                $value = $candidate;
+            }
+        }
+
+        // Final safety net: nothing from these NJP page scripts may reach users.
+        foreach ([
+            'Toggle Job Description Read More / Less',
+            'isDescriptionExpanded',
+            'toggle-description-btn',
+            "document.addEventListener('DOMContentLoaded'",
+            'document.addEventListener("DOMContentLoaded"',
+        ] as $marker) {
+            $position = stripos($value, $marker);
+
+            if ($position !== false) {
+                $value = substr($value, 0, $position);
             }
         }
 
         $value = preg_replace('/\bRead More\b\s*$/i', '', $value) ?? $value;
         $value = preg_replace('/[ \t]+/', ' ', $value) ?? $value;
         $value = preg_replace('/\R{3,}/', "\n\n", $value) ?? $value;
-        $value = trim($value);
+        $value = trim($value, " \t\n\r\0\x0B:-");
 
         if ($value !== '' && stripos($value, 'Source: National Jobs Portal (NJP)') === false) {
             $value .= "\n\nSource: National Jobs Portal (NJP)";
