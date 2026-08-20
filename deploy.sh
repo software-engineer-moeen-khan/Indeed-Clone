@@ -202,6 +202,9 @@ fi
 log "Running database migrations"
 php artisan migrate --force --no-interaction
 
+log "Ensuring country reference data is populated"
+php artisan db:seed --class='Database\Seeders\CountrySeeder' --force --no-interaction
+
 log "Creating public storage link"
 php artisan storage:link --force --no-interaction || true
 
