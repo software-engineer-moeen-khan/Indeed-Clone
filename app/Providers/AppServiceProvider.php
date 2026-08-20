@@ -28,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->configureProductionSearch();
         $this->configureUrl();
         $this->registerHttpMacros();
         $this->configureCommand();
@@ -35,7 +36,21 @@ class AppServiceProvider extends ServiceProvider
         // $this->configureRateLimiter();
         $this->configureLogViewer();
         Livewire::component('job-filter', \App\Livewire\JobFilter::class);
+    }
 
+    /**
+     * Hostinger shared hosting does not run a local Typesense daemon. Force
+     * Scout's database engine for production HTTP, Livewire and Filament
+     * requests so model create/update/delete events never call localhost:8108.
+     */
+    private function configureProductionSearch(): void
+    {
+        if ($this->app->isProduction()) {
+            config([
+                'scout.driver' => 'database',
+                'scout.queue' => false,
+            ]);
+        }
     }
 
     private function configureUrl(): void
@@ -48,7 +63,6 @@ class AppServiceProvider extends ServiceProvider
     private function registerHttpMacros(): void
     {
         try {
-
             $this->registerJobMacro();
             $this->registerOpenAIMacro();
         } catch (\Exception $e) {
