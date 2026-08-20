@@ -16,6 +16,7 @@ use App\Caches\MostViewedJobsCache;
 use App\Caches\RelatedJobListingCache;
 use App\Jobs\SubmitUrlToGoogleIndexing;
 use App\Models\JobListing;
+use App\Support\JobDescriptionSanitizer;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -23,6 +24,19 @@ use Throwable;
 
 class JobListingObserver
 {
+    public function saving(JobListing $jobListing): void
+    {
+        if (! $this->isNjpJob($jobListing)) {
+            return;
+        }
+
+        $jobListing->description = JobDescriptionSanitizer::sanitize(
+            (string) $jobListing->description,
+            (string) $jobListing->job_title,
+            (string) $jobListing->employer_name,
+        );
+    }
+
     public function creating(JobListing $jobListing): void
     {
         // time() can generate the same slug when multiple jobs with the same
@@ -79,6 +93,16 @@ class JobListingObserver
 
         // Google indexing remains disabled unless explicitly enabled in config.
         // $this->dispatchGoogleIndexingJob($jobListing, $event === 'deleted' ? 'URL_DELETED' : 'URL_UPDATED');
+    }
+
+    private function isNjpJob(JobListing $jobListing): bool
+    {
+        $publisher = Str::lower(trim((string) $jobListing->publisher));
+        $applyLink = Str::lower(trim((string) $jobListing->apply_link));
+
+        return str_contains($publisher, 'national jobs portal')
+            || str_contains($publisher, 'national job portal')
+            || str_contains($applyLink, 'njp.gov.pk');
     }
 
     protected function clearCache(): void
