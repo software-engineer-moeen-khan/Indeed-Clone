@@ -5,7 +5,9 @@ namespace App\Caches;
 use App\Models\JobListing;
 use Illuminate\Support\Facades\Cache;
 
-class JobListingCache{
+class JobListingCache
+{
+    private const VERSION_KEY = 'job_detail_cache_version';
 
     public static function get($slug)
     {
@@ -18,12 +20,19 @@ class JobListingCache{
 
     public static function invalidate()
     {
-        return Cache::forget(self::key('*'));
+        if (Cache::has(self::VERSION_KEY)) {
+            Cache::increment(self::VERSION_KEY);
+        } else {
+            Cache::put(self::VERSION_KEY, 2, 60 * 24 * 30);
+        }
+
+        return true;
     }
 
     public static function key($slug)
     {
-        return 'job_' . $slug;
+        $version = (int) Cache::get(self::VERSION_KEY, 1);
+
+        return 'job_v'.$version.'_'.$slug;
     }
-    
 }
