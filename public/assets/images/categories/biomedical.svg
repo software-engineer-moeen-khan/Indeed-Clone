@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Biomedical Engineering">
+  <rect width="128" height="128" rx="24" fill="#ecfdf5"/>
+  <path d="M56 28h16v28h28v16H72v28H56V72H28V56h28V28z" fill="#059669"/>
+  <path d="M18 86h18l7-14 10 24 12-38 11 28h34" fill="none" stroke="#0f172a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
