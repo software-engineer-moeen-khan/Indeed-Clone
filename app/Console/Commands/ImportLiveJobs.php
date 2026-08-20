@@ -33,18 +33,23 @@ class ImportLiveJobs extends Command
     public function handle(): int
     {
         $limit = max(1, min(50, (int) $this->option('limit')));
-        $sources = $this->parseSources((string) $this->option('sources'));
+        $sources = $this->parseSources($this->text($this->option('sources')));
 
         if ($sources === []) {
             $this->error('No supported source selected. Supported: himalayas, remotive, arbeitnow, jobicy.');
+
             return self::FAILURE;
         }
 
         $this->ensureBiomedicalCategory();
-        $categories = $this->categoriesInImportOrder((string) ($this->option('category') ?? ''));
+
+        $categories = $this->categoriesInImportOrder(
+            $this->text($this->option('category'))
+        );
 
         if ($categories->isEmpty()) {
             $this->error('No matching job category found.');
+
             return self::FAILURE;
         }
 
@@ -75,27 +80,28 @@ class ImportLiveJobs extends Command
             ];
 
             if ($synced < $limit) {
-                $this->components->warn("{$category->name}: found {$synced}/{$limit} unique live jobs. Re-run later for additional openings.");
+                $this->components->warn(
+                    "{$category->name}: found {$synced}/{$limit} unique live jobs. Re-run later for additional openings."
+                );
             } else {
                 $this->components->info("{$category->name}: {$synced}/{$limit} jobs synced");
             }
         }
 
-        Cache::forget('jobCategories');
-        Cache::forget('jobCategoriesJobsCount');
-        Cache::forget('jobCategoriesAll');
+        foreach (['jobCategories', 'jobCategoriesJobsCount', 'jobCategoriesAll'] as $cacheKey) {
+            Cache::forget($cacheKey);
+        }
 
         $this->newLine();
         $this->table(['Category', 'Synced', 'Target', 'Sources'], $summary);
         $this->info("Done. {$totalSynced} category job slots synced using {$this->requestCount} live HTTP requests.");
-        $this->line('Apply Now uses the imported job source/application URL.');
+        $this->line('Apply Now uses the imported real source/application URL.');
 
         return self::SUCCESS;
     }
 
     private function importCategory(JobCategory $category, int $limit, array $sources): array
     {
-        $queries = $this->queriesFor($category);
         $candidates = [];
         $seen = [];
 
@@ -105,7 +111,11 @@ class ImportLiveJobs extends Command
             }
 
             foreach ($this->feedCache[$source] ?? [] as $job) {
-                $normalized = $this->normalizeJob($source, $job);
+                if (! is_array($job)) {
+                    continue;
+                }
+
+                $normalized = $this->safeNormalize($source, $job);
 
                 if ($normalized === null || ! $this->matchesCategory($category, $normalized)) {
                     continue;
@@ -116,10 +126,12 @@ class ImportLiveJobs extends Command
         }
 
         if (in_array('himalayas', $sources, true) && count($candidates) < ($limit * 2)) {
-            foreach ($queries as $query) {
+            foreach ($this->queriesFor($category) as $query) {
                 try {
-                    foreach ($this->fetchHimalayas($query, $category->slug === self::BIOMEDICAL_SLUG ? 2 : 1) as $job) {
-                        $normalized = $this->normalizeJob('himalayas', $job);
+                    $pages = $category->slug === self::BIOMEDICAL_SLUG ? 2 : 1;
+
+                    foreach ($this->fetchHimalayas($query, $pages) as $job) {
+                        $normalized = $this->safeNormalize('himalayas', $job);
 
                         if ($normalized === null || ! $this->matchesCategory($category, $normalized)) {
                             continue;
@@ -137,8 +149,10 @@ class ImportLiveJobs extends Command
             }
         }
 
-        usort($candidates, static fn (array $a, array $b): int =>
-            ($b['posted_at']?->getTimestamp() ?? 0) <=> ($a['posted_at']?->getTimestamp() ?? 0)
+        usort(
+            $candidates,
+            static fn (array $a, array $b): int =>
+                ($b['posted_at']?->getTimestamp() ?? 0) <=> ($a['posted_at']?->getTimestamp() ?? 0)
         );
 
         $synced = 0;
@@ -149,7 +163,9 @@ class ImportLiveJobs extends Command
                 break;
             }
 
-            $existing = JobListing::query()->where('apply_link', $candidate['apply_link'])->first();
+            $existing = JobListing::query()
+                ->where('apply_link', $candidate['apply_link'])
+                ->first();
 
             if ($existing && (int) $existing->job_category !== (int) $category->id) {
                 continue;
@@ -171,9 +187,30 @@ class ImportLiveJobs extends Command
         return [$synced, $providers];
     }
 
+    private function safeNormalize(string $source, array $job): ?array
+    {
+        try {
+            return match ($source) {
+                'himalayas' => $this->normalizeHimalayas($job),
+                'remotive' => $this->normalizeRemotive($job),
+                'arbeitnow' => $this->normalizeArbeitnow($job),
+                'jobicy' => $this->normalizeJobicy($job),
+                default => null,
+            };
+        } catch (Throwable $e) {
+            $this->components->warn("Skipped malformed {$source} job: {$e->getMessage()}");
+
+            return null;
+        }
+    }
+
     private function warmSharedFeeds(array $sources): void
     {
         foreach ($sources as $source) {
+            if ($source === 'himalayas') {
+                continue;
+            }
+
             try {
                 $this->feedCache[$source] = match ($source) {
                     'remotive' => $this->fetchRemotiveFeed(),
@@ -203,6 +240,7 @@ class ImportLiveJobs extends Command
                 ->json();
 
             $pageJobs = $this->extractJobsArray($response);
+
             if ($pageJobs === []) {
                 break;
             }
@@ -220,21 +258,25 @@ class ImportLiveJobs extends Command
             ->throw()
             ->json();
 
-        return is_array($response['jobs'] ?? null) ? $response['jobs'] : [];
+        return $this->extractJobsArray($response);
     }
 
     private function fetchArbeitnowFeed(): array
     {
         $jobs = [];
 
-        foreach (['https://www.arbeitnow.com/api/job-board-api', 'https://www.arbeitnow.co.uk/api/job-board-api'] as $endpoint) {
+        foreach ([
+            'https://www.arbeitnow.com/api/job-board-api',
+            'https://www.arbeitnow.co.uk/api/job-board-api',
+        ] as $endpoint) {
             for ($page = 1; $page <= 5; $page++) {
                 $response = $this->http()
                     ->get($endpoint, ['page' => $page])
                     ->throw()
                     ->json();
 
-                $pageJobs = is_array($response['data'] ?? null) ? $response['data'] : [];
+                $pageJobs = $this->extractJobsArray($response);
+
                 if ($pageJobs === []) {
                     break;
                 }
@@ -257,85 +299,72 @@ class ImportLiveJobs extends Command
             ->throw()
             ->json();
 
-        return is_array($response['jobs'] ?? null) ? $response['jobs'] : [];
-    }
-
-    private function normalizeJob(string $source, array $job): ?array
-    {
-        return match ($source) {
-            'himalayas' => $this->normalizeHimalayas($job),
-            'remotive' => $this->normalizeRemotive($job),
-            'arbeitnow' => $this->normalizeArbeitnow($job),
-            'jobicy' => $this->normalizeJobicy($job),
-            default => null,
-        };
+        return $this->extractJobsArray($response);
     }
 
     private function normalizeHimalayas(array $job): ?array
     {
-        $title = (string) ($job['title'] ?? $job['jobTitle'] ?? '');
-        $applyLink = (string) ($job['applicationLink'] ?? $job['application_link'] ?? $job['url'] ?? '');
-        $company = (string) ($job['companyName'] ?? data_get($job, 'company.name') ?? 'Unknown employer');
+        $title = $this->text($job['title'] ?? $job['jobTitle'] ?? null);
+        $applyLink = $this->firstUrl(
+            $job['applicationLink'] ?? $job['application_link'] ?? $job['url'] ?? null
+        );
+        $company = $this->text(
+            $job['companyName'] ?? data_get($job, 'company.name'),
+            'Unknown employer'
+        );
 
-        if ($title === '' || ! $this->validHttpUrl($applyLink)) {
+        if ($title === '' || $applyLink === '') {
             return null;
         }
 
-        $locations = $job['locationRestrictions'] ?? [];
-        $country = 'Remote';
-
-        if (is_array($locations) && $locations !== []) {
-            $names = array_map(static function ($location): string {
-                return is_array($location) ? (string) ($location['name'] ?? '') : (string) $location;
-            }, $locations);
-            $names = array_values(array_filter($names));
-            $country = $names !== [] ? implode(', ', $names) : 'Remote';
-        }
+        $country = $this->text($job['locationRestrictions'] ?? null, 'Remote');
 
         return $this->baseJob(
             'Himalayas',
             $title,
             $company,
             $applyLink,
-            (string) ($job['description'] ?? ''),
-            (string) ($job['employmentType'] ?? $job['employment_type'] ?? ''),
+            $this->text($job['description'] ?? null),
+            $this->text($job['employmentType'] ?? $job['employment_type'] ?? null),
             true,
             null,
             null,
             $country,
             $job['pubDate'] ?? $job['publicationDate'] ?? null,
-            (string) ($job['companyLogo'] ?? data_get($job, 'company.logo') ?? ''),
-            (string) ($job['companyWebsite'] ?? data_get($job, 'company.website') ?? ''),
+            $this->firstUrl($job['companyLogo'] ?? data_get($job, 'company.logo')),
+            $this->firstUrl($job['companyWebsite'] ?? data_get($job, 'company.website')),
             $job['minSalary'] ?? $job['salaryMin'] ?? null,
             $job['maxSalary'] ?? $job['salaryMax'] ?? null,
-            (string) ($job['currency'] ?? '')
+            $this->text($job['currency'] ?? null)
         );
     }
 
     private function normalizeRemotive(array $job): ?array
     {
-        $title = (string) ($job['title'] ?? '');
-        $applyLink = (string) ($job['url'] ?? '');
+        $title = $this->text($job['title'] ?? null);
+        $applyLink = $this->firstUrl($job['url'] ?? null);
 
-        if ($title === '' || ! $this->validHttpUrl($applyLink)) {
+        if ($title === '' || $applyLink === '') {
             return null;
         }
 
-        [$minSalary, $maxSalary, $currency] = $this->parseSalaryText((string) ($job['salary'] ?? ''));
+        [$minSalary, $maxSalary, $currency] = $this->parseSalaryText(
+            $this->text($job['salary'] ?? null)
+        );
 
         return $this->baseJob(
             'Remotive',
             $title,
-            (string) ($job['company_name'] ?? 'Unknown employer'),
+            $this->text($job['company_name'] ?? null, 'Unknown employer'),
             $applyLink,
-            (string) ($job['description'] ?? ''),
-            (string) ($job['job_type'] ?? ''),
+            $this->text($job['description'] ?? null),
+            $this->text($job['job_type'] ?? null),
             true,
             null,
             null,
-            (string) ($job['candidate_required_location'] ?? 'Remote'),
+            $this->text($job['candidate_required_location'] ?? null, 'Remote'),
             $job['publication_date'] ?? null,
-            (string) ($job['company_logo'] ?? ''),
+            $this->firstUrl($job['company_logo'] ?? null),
             '',
             $minSalary,
             $maxSalary,
@@ -345,57 +374,54 @@ class ImportLiveJobs extends Command
 
     private function normalizeArbeitnow(array $job): ?array
     {
-        $title = (string) ($job['title'] ?? '');
-        $applyLink = (string) ($job['url'] ?? '');
+        $title = $this->text($job['title'] ?? null);
+        $applyLink = $this->firstUrl($job['url'] ?? null);
 
-        if ($title === '' || ! $this->validHttpUrl($applyLink)) {
+        if ($title === '' || $applyLink === '') {
             return null;
         }
-
-        $types = $job['job_types'] ?? [];
-        $employmentType = is_array($types) ? implode(', ', array_slice($types, 0, 2)) : (string) $types;
 
         return $this->baseJob(
             'Arbeitnow',
             $title,
-            (string) ($job['company_name'] ?? 'Unknown employer'),
+            $this->text($job['company_name'] ?? null, 'Unknown employer'),
             $applyLink,
-            (string) ($job['description'] ?? ''),
-            $employmentType,
-            (bool) ($job['remote'] ?? false),
-            (string) ($job['location'] ?? '') ?: null,
+            $this->text($job['description'] ?? null),
+            $this->text($job['job_types'] ?? null),
+            $this->toBool($job['remote'] ?? false),
+            $this->text($job['location'] ?? null) ?: null,
             null,
             null,
-            isset($job['created_at']) && is_numeric($job['created_at']) ? Carbon::createFromTimestamp((int) $job['created_at']) : null
+            $job['created_at'] ?? null
         );
     }
 
     private function normalizeJobicy(array $job): ?array
     {
-        $title = (string) ($job['jobTitle'] ?? $job['title'] ?? '');
-        $applyLink = (string) ($job['url'] ?? $job['jobUrl'] ?? '');
+        $title = $this->text($job['jobTitle'] ?? $job['title'] ?? null);
+        $applyLink = $this->firstUrl($job['url'] ?? $job['jobUrl'] ?? null);
 
-        if ($title === '' || ! $this->validHttpUrl($applyLink)) {
+        if ($title === '' || $applyLink === '') {
             return null;
         }
 
         return $this->baseJob(
             'Jobicy',
             $title,
-            (string) ($job['companyName'] ?? $job['company'] ?? 'Unknown employer'),
+            $this->text($job['companyName'] ?? $job['company'] ?? null, 'Unknown employer'),
             $applyLink,
-            (string) ($job['jobDescription'] ?? $job['description'] ?? ''),
-            (string) ($job['jobType'] ?? $job['employmentType'] ?? ''),
+            $this->text($job['jobDescription'] ?? $job['description'] ?? null),
+            $this->text($job['jobType'] ?? $job['employmentType'] ?? null),
             true,
             null,
             null,
-            (string) ($job['jobGeo'] ?? $job['location'] ?? 'Remote'),
+            $this->text($job['jobGeo'] ?? $job['location'] ?? null, 'Remote'),
             $job['pubDate'] ?? $job['publicationDate'] ?? null,
-            (string) ($job['companyLogo'] ?? ''),
+            $this->firstUrl($job['companyLogo'] ?? null),
             '',
             $job['annualSalaryMin'] ?? $job['salaryMin'] ?? null,
             $job['annualSalaryMax'] ?? $job['salaryMax'] ?? null,
-            (string) ($job['salaryCurrency'] ?? $job['currency'] ?? '')
+            $this->text($job['salaryCurrency'] ?? $job['currency'] ?? null)
         );
     }
 
@@ -449,7 +475,13 @@ class ImportLiveJobs extends Command
     private function queriesFor(JobCategory $category): array
     {
         $aliases = [
-            self::BIOMEDICAL_SLUG => ['biomedical engineer', 'biomedical engineering', 'medical device engineer', 'clinical engineer', 'bioengineer'],
+            self::BIOMEDICAL_SLUG => [
+                'biomedical engineer',
+                'biomedical engineering',
+                'medical device engineer',
+                'clinical engineer',
+                'bioengineer',
+            ],
             'laravel' => ['Laravel developer', 'Laravel PHP'],
             'symfony' => ['Symfony developer', 'Symfony PHP'],
             'wordpress' => ['WordPress developer', 'WordPress engineer'],
@@ -466,9 +498,9 @@ class ImportLiveJobs extends Command
             'aspnet' => ['ASP.NET developer', '.NET developer'],
         ];
 
-        $queries = $aliases[Str::lower($category->slug)] ?? [
-            trim((string) $category->query_name),
-            trim((string) $category->name),
+        $queries = $aliases[Str::lower((string) $category->slug)] ?? [
+            $this->text($category->query_name),
+            $this->text($category->name),
         ];
 
         return array_values(array_unique(array_filter($queries)));
@@ -476,11 +508,21 @@ class ImportLiveJobs extends Command
 
     private function matchesCategory(JobCategory $category, array $job): bool
     {
-        $haystack = Str::lower(($job['job_title'] ?? '').' '.($job['description'] ?? ''));
-        $slug = Str::lower($category->slug);
+        $haystack = Str::lower(
+            $this->text($job['job_title'] ?? null).' '.$this->text($job['description'] ?? null)
+        );
+        $slug = Str::lower((string) $category->slug);
 
         $keywords = match ($slug) {
-            self::BIOMEDICAL_SLUG => ['biomedical', 'medical device', 'clinical engineer', 'biomechanical', 'bioengineer', 'bio-engineer', 'medical equipment'],
+            self::BIOMEDICAL_SLUG => [
+                'biomedical',
+                'medical device',
+                'clinical engineer',
+                'biomechanical',
+                'bioengineer',
+                'bio-engineer',
+                'medical equipment',
+            ],
             'laravel' => ['laravel'],
             'symfony' => ['symfony'],
             'wordpress' => ['wordpress'],
@@ -495,7 +537,7 @@ class ImportLiveJobs extends Command
             'nodejs' => ['node.js', 'nodejs', 'node developer', 'node engineer'],
             'python' => ['python'],
             'aspnet' => ['asp.net', '.net developer', '.net engineer', 'dotnet'],
-            default => [Str::lower(trim((string) $category->query_name))],
+            default => [Str::lower($this->text($category->query_name))],
         };
 
         foreach (array_filter($keywords) as $keyword) {
@@ -527,13 +569,14 @@ class ImportLiveJobs extends Command
 
         if ($onlyCategory !== '') {
             $needle = Str::lower(trim($onlyCategory));
-            $categories = $categories->filter(static function (JobCategory $category) use ($needle): bool {
-                return in_array($needle, [
-                    Str::lower($category->name),
-                    Str::lower($category->slug),
+
+            $categories = $categories->filter(
+                static fn (JobCategory $category): bool => in_array($needle, [
+                    Str::lower((string) $category->name),
+                    Str::lower((string) $category->slug),
                     Str::lower((string) $category->query_name),
-                ], true);
-            });
+                ], true)
+            );
         }
 
         return $categories
@@ -562,7 +605,7 @@ class ImportLiveJobs extends Command
         $this->requestCount++;
 
         return Http::acceptJson()
-            ->withUserAgent('BestWayJobs/1.0 (+live-job-import)')
+            ->withUserAgent('BestWayJobs/1.1 (+live-job-import)')
             ->timeout(25)
             ->connectTimeout(10)
             ->retry([400, 900], throw: false);
@@ -580,12 +623,14 @@ class ImportLiveJobs extends Command
             }
         }
 
-        return array_is_list($response) ? array_values(array_filter($response, 'is_array')) : [];
+        return array_is_list($response)
+            ? array_values(array_filter($response, 'is_array'))
+            : [];
     }
 
     private function appendCandidate(array &$candidates, array &$seen, array $job): void
     {
-        $key = $this->normalizeUrlForDedup($job['apply_link']);
+        $key = $this->normalizeUrlForDedup($this->text($job['apply_link'] ?? null));
 
         if ($key === '' || isset($seen[$key])) {
             return;
@@ -593,6 +638,113 @@ class ImportLiveJobs extends Command
 
         $seen[$key] = true;
         $candidates[] = $job;
+    }
+
+    /**
+     * Convert an API value to safe readable text.
+     * Handles strings, numbers, booleans, lists and nested objects without
+     * triggering "Array to string conversion" notices.
+     */
+    private function text(mixed $value, string $default = ''): string
+    {
+        if ($value === null) {
+            return $default;
+        }
+
+        if (is_string($value) || is_numeric($value)) {
+            $text = trim((string) $value);
+
+            return $text !== '' ? $text : $default;
+        }
+
+        if (is_bool($value)) {
+            return $value ? 'Yes' : 'No';
+        }
+
+        if ($value instanceof \Stringable) {
+            $text = trim((string) $value);
+
+            return $text !== '' ? $text : $default;
+        }
+
+        if (! is_array($value)) {
+            return $default;
+        }
+
+        foreach (['name', 'label', 'title', 'value', 'text'] as $preferredKey) {
+            if (array_key_exists($preferredKey, $value)) {
+                $preferred = $this->text($value[$preferredKey]);
+
+                if ($preferred !== '') {
+                    return $preferred;
+                }
+            }
+        }
+
+        $parts = [];
+
+        foreach ($value as $item) {
+            $text = $this->text($item);
+
+            if ($text !== '') {
+                $parts[] = $text;
+            }
+        }
+
+        $parts = array_values(array_unique($parts));
+
+        return $parts !== [] ? implode(', ', $parts) : $default;
+    }
+
+    /**
+     * Return the first valid HTTP(S) URL found in a scalar or nested API value.
+     */
+    private function firstUrl(mixed $value): string
+    {
+        if (is_string($value)) {
+            $value = trim($value);
+
+            return $this->validHttpUrl($value) ? $value : '';
+        }
+
+        if (! is_array($value)) {
+            return '';
+        }
+
+        foreach (['url', 'link', 'href', 'applicationLink', 'application_link'] as $key) {
+            if (array_key_exists($key, $value)) {
+                $url = $this->firstUrl($value[$key]);
+
+                if ($url !== '') {
+                    return $url;
+                }
+            }
+        }
+
+        foreach ($value as $item) {
+            $url = $this->firstUrl($item);
+
+            if ($url !== '') {
+                return $url;
+            }
+        }
+
+        return '';
+    }
+
+    private function toBool(mixed $value): bool
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_numeric($value)) {
+            return (int) $value !== 0;
+        }
+
+        $text = Str::lower($this->text($value));
+
+        return in_array($text, ['1', 'true', 'yes', 'remote'], true);
     }
 
     private function cleanDescription(string $description): string
@@ -614,8 +766,14 @@ class ImportLiveJobs extends Command
             return Carbon::createFromTimestamp((int) $value);
         }
 
+        $text = $this->text($value);
+
+        if ($text === '') {
+            return now();
+        }
+
         try {
-            return $value ? Carbon::parse((string) $value) : now();
+            return Carbon::parse($text);
         } catch (Throwable) {
             return now();
         }
@@ -627,15 +785,28 @@ class ImportLiveJobs extends Command
             return [null, null, ''];
         }
 
-        $currency = str_contains($salary, '$') ? 'USD' : (str_contains($salary, '€') ? 'EUR' : (str_contains($salary, '£') ? 'GBP' : ''));
+        $currency = str_contains($salary, '$')
+            ? 'USD'
+            : (str_contains($salary, '€')
+                ? 'EUR'
+                : (str_contains($salary, '£') ? 'GBP' : ''));
+
         preg_match_all('/\d[\d,.]*/', $salary, $matches);
 
-        $numbers = array_values(array_filter(array_map(static function (string $number): ?float {
-            $number = str_replace([',', ' '], '', $number);
-            return is_numeric($number) ? (float) $number : null;
-        }, $matches[0] ?? []), static fn ($value): bool => $value !== null));
+        $numbers = array_values(array_filter(
+            array_map(static function (string $number): ?float {
+                $number = str_replace([',', ' '], '', $number);
 
-        return [$numbers[0] ?? null, $numbers[1] ?? ($numbers[0] ?? null), $currency];
+                return is_numeric($number) ? (float) $number : null;
+            }, $matches[0] ?? []),
+            static fn ($value): bool => $value !== null
+        ));
+
+        return [
+            $numbers[0] ?? null,
+            $numbers[1] ?? ($numbers[0] ?? null),
+            $currency,
+        ];
     }
 
     private function numericSalary(mixed $value): ?float
@@ -644,20 +815,38 @@ class ImportLiveJobs extends Command
             return null;
         }
 
+        if (is_array($value)) {
+            foreach ($value as $item) {
+                $salary = $this->numericSalary($item);
+
+                if ($salary !== null) {
+                    return $salary;
+                }
+            }
+
+            return null;
+        }
+
         if (is_numeric($value)) {
             return min((float) $value, 99999999.99);
         }
 
-        $clean = preg_replace('/[^\d.]/', '', (string) $value);
+        $clean = preg_replace('/[^\d.]/', '', $this->text($value));
 
-        return $clean !== '' && is_numeric($clean) ? min((float) $clean, 99999999.99) : null;
+        return $clean !== '' && is_numeric($clean)
+            ? min((float) $clean, 99999999.99)
+            : null;
     }
 
     private function humanizeEmploymentType(string $type): string
     {
         return $type === ''
             ? 'Not specified'
-            : Str::of($type)->replace(['_', '-'], ' ')->squish()->title()->toString();
+            : Str::of($type)
+                ->replace(['_', '-'], ' ')
+                ->squish()
+                ->title()
+                ->toString();
     }
 
     private function validHttpUrl(string $url): bool
@@ -666,7 +855,11 @@ class ImportLiveJobs extends Command
             return false;
         }
 
-        return in_array(Str::lower((string) parse_url($url, PHP_URL_SCHEME)), ['http', 'https'], true);
+        return in_array(
+            Str::lower((string) parse_url($url, PHP_URL_SCHEME)),
+            ['http', 'https'],
+            true
+        );
     }
 
     private function normalizeUrlForDedup(string $url): string
@@ -677,6 +870,8 @@ class ImportLiveJobs extends Command
             return Str::lower(trim($url));
         }
 
-        return Str::lower(($parts['host'] ?? '').rtrim((string) ($parts['path'] ?? ''), '/'));
+        return Str::lower(
+            ($parts['host'] ?? '').rtrim((string) ($parts['path'] ?? ''), '/')
+        );
     }
 }
