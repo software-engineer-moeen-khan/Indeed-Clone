@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Caches\CountryAwareJobPageCache;
 use App\Caches\CountryAwareLatestJobsCache;
 use App\Caches\CountryAwareMostViewedJobsCache;
+use App\Caches\ImprovedRelatedJobListingCache;
 use App\Caches\JobCategoryCache;
 use App\Caches\JobFilterCache;
 use App\Caches\JobListingCache;
@@ -13,12 +14,12 @@ use App\Caches\JobsCountCache;
 use App\Caches\LatestJobsCache;
 use App\Caches\MostViewedJobsCache;
 use App\Caches\RelatedJobListingCache;
-use App\Caches\ImprovedRelatedJobListingCache;
 use App\Jobs\SubmitUrlToGoogleIndexing;
 use App\Models\JobListing;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Throwable;
 
 class JobListingObserver
 {
@@ -32,41 +33,49 @@ class JobListingObserver
 
     public function created(JobListing $jobListing): void
     {
-        $this->clearCache();
-        // Only invalidate related jobs cache for the same category
-        RelatedJobListingCache::invalidateForCategory($jobListing->job_category);
-        ImprovedRelatedJobListingCache::invalidateForCategory($jobListing->job_category);
-
-        // Dispatch Google indexing job (disabled via config)
-        //$this->dispatchGoogleIndexingJob($jobListing, 'URL_UPDATED');
+        $this->afterMutation($jobListing, 'created');
     }
 
     public function updated(JobListing $jobListing): void
     {
-        $this->clearCache();
-        // Only invalidate related jobs cache for the same category
-        RelatedJobListingCache::invalidateForCategory($jobListing->job_category);
-        ImprovedRelatedJobListingCache::invalidateForCategory($jobListing->job_category);
-
-        // Dispatch Google indexing job (disabled via config)
-        //$this->dispatchGoogleIndexingJob($jobListing, 'URL_UPDATED');
+        $this->afterMutation($jobListing, 'updated');
     }
 
     public function deleted(JobListing $jobListing): void
     {
-        $this->clearCache();
-        // Only invalidate related jobs cache for the same category
-        RelatedJobListingCache::invalidateForCategory($jobListing->job_category);
-        ImprovedRelatedJobListingCache::invalidateForCategory($jobListing->job_category);
+        $this->afterMutation($jobListing, 'deleted');
+    }
 
-        // Dispatch Google indexing job for deletion (disabled via config)
-        //$this->dispatchGoogleIndexingJob($jobListing, 'URL_DELETED');
+    /**
+     * Cache refreshes are secondary work. A cache-store problem must never turn
+     * a successful admin create/edit/delete into a 500 response.
+     */
+    private function afterMutation(JobListing $jobListing, string $event): void
+    {
+        try {
+            $this->clearCache();
+            RelatedJobListingCache::invalidateForCategory($jobListing->job_category);
+            ImprovedRelatedJobListingCache::invalidateForCategory($jobListing->job_category);
+        } catch (Throwable $e) {
+            Log::warning('Job cache invalidation failed after model mutation', [
+                'event' => $event,
+                'job_listing_id' => $jobListing->id,
+                'job_category' => $jobListing->job_category,
+                'error' => $e->getMessage(),
+                'exception' => get_class($e),
+            ]);
+        }
+
+        // Google indexing remains disabled unless explicitly enabled in config.
+        // $this->dispatchGoogleIndexingJob($jobListing, $event === 'deleted' ? 'URL_DELETED' : 'URL_UPDATED');
     }
 
     protected function clearCache(): void
     {
+        Cache::forget('jobCategories');
         Cache::forget('jobCategoriesJobsCount');
         Cache::forget('jobCategoriesAll');
+
         JobListingCache::invalidate();
         JobPageCache::invalidate();
         MostViewedJobsCache::invalidate();
@@ -75,9 +84,7 @@ class JobListingObserver
         CountryAwareMostViewedJobsCache::invalidate();
         CountryAwareLatestJobsCache::invalidate();
         CountryAwareJobPageCache::invalidate();
-        
-        // Only invalidate related jobs cache for the same category, not all
-        // RelatedJobListingCache::invalidate(); // Commented out to reduce aggressive cache clearing
+
         JobCategoryCache::invalidate();
         JobFilterCache::invalidate();
 
@@ -89,23 +96,26 @@ class JobListingObserver
         }
     }
 
-    /**
-     * Determine if count caches should be invalidated to reduce cache churn
-     */
-     private function shouldInvalidateCountCaches(): bool
-     {
-         $counter = Cache::increment('job_count_cache_invalidation_counter');
-     
-         // Invalidate every 10th operation.
-         $shouldInvalidate = ($counter % 10 === 0);
-     
-         // Reset counter periodically to prevent it from growing too large.
-         if ($counter >= 100) {
-             Cache::put('job_count_cache_invalidation_counter', 0);
-         }
-     
-         return $shouldInvalidate;
-     }
+    private function shouldInvalidateCountCaches(): bool
+    {
+        try {
+            $counter = (int) Cache::increment('job_count_cache_invalidation_counter');
+
+            if ($counter >= 100) {
+                Cache::put('job_count_cache_invalidation_counter', 0);
+            }
+
+            return $counter > 0 && $counter % 10 === 0;
+        } catch (Throwable $e) {
+            Log::warning('Job cache invalidation counter unavailable', [
+                'error' => $e->getMessage(),
+                'exception' => get_class($e),
+            ]);
+
+            // Prefer refreshing count caches over failing an admin mutation.
+            return true;
+        }
+    }
 
     protected function dispatchGoogleIndexingJob(JobListing $jobListing, string $type): void
     {
@@ -120,7 +130,7 @@ class JobListingObserver
         try {
             $url = route('job.show', $jobListing->slug);
             SubmitUrlToGoogleIndexing::dispatch($url, $type);
-        } catch (\Exception $e) {
+        } catch (Throwable $e) {
             Log::warning('Failed to dispatch Google indexing job', [
                 'job_listing_id' => $jobListing->id,
                 'slug' => $jobListing->slug,
