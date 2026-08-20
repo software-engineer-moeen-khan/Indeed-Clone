@@ -8,6 +8,7 @@ use App\Observers\JobListingObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
@@ -70,6 +71,60 @@ class JobListing extends Model
             'latitude' => 'float',
             'longitude' => 'float',
         ];
+    }
+
+    /**
+     * NJP pages can contain the entire rendered page when a structured
+     * description is unavailable. Keep only the real Job Description section
+     * and never expose footer/JavaScript text to job seekers.
+     *
+     * The setter cleans future imports, while the getter also fixes already
+     * imported rows immediately without requiring a destructive data migration.
+     */
+    protected function description(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value): ?string => $this->cleanImportedDescription($value),
+            set: fn (?string $value): ?string => $this->cleanImportedDescription($value),
+        );
+    }
+
+    private function cleanImportedDescription(?string $value): ?string
+    {
+        if ($value === null || trim($value) === '') {
+            return $value;
+        }
+
+        $hasNpjPageArtifacts =
+            stripos($value, 'Toggle Job Description Read More / Less') !== false ||
+            stripos($value, 'isDescriptionExpanded') !== false ||
+            stripos($value, 'toggle-description-btn') !== false;
+
+        if (! $hasNpjPageArtifacts) {
+            return $value;
+        }
+
+        $start = stripos($value, 'Job Description');
+
+        if ($start !== false) {
+            $start += strlen('Job Description');
+            $end = stripos($value, 'Eligibility Criteria', $start);
+
+            if ($end !== false && $end > $start) {
+                $value = substr($value, $start, $end - $start);
+            }
+        }
+
+        $value = preg_replace('/\bRead More\b\s*$/i', '', $value) ?? $value;
+        $value = preg_replace('/[ \t]+/', ' ', $value) ?? $value;
+        $value = preg_replace('/\R{3,}/', "\n\n", $value) ?? $value;
+        $value = trim($value);
+
+        if ($value !== '' && stripos($value, 'Source: National Jobs Portal (NJP)') === false) {
+            $value .= "\n\nSource: National Jobs Portal (NJP)";
+        }
+
+        return $value;
     }
 
     public function users(): BelongsToMany
